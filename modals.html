@@ -1,0 +1,542 @@
+<!-- Modals Container cho Mini DMS -->
+
+<!-- 1. Modal Tiếp nhận Văn bản Đến -->
+<div id="modal-receive-doc" class="modal-backdrop">
+  <div class="modal-dialog modal-dialog-lg">
+    <div class="modal-header">
+      <div class="modal-title">📥 Tiếp Nhận & Vào Sổ Văn Bản Đến</div>
+      <button class="modal-close" onclick="DMS.closeModal('modal-receive-doc')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-receive-doc">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label class="form-label">Số hiệu văn bản gốc <span style="color:red">*</span></label>
+            <input type="text" id="receive-doc-no" class="form-control" placeholder="Ví dụ: 123/SYT-NVY" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ký hiệu</label>
+            <input type="text" id="receive-symbol" class="form-control" placeholder="Ví dụ: SYT-NVY">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cơ quan ban hành <span style="color:red">*</span></label>
+            <input type="text" id="receive-issuer" class="form-control" placeholder="Ví dụ: Sở Y Tế TP.HCM" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Loại văn bản</label>
+            <select id="receive-category" class="form-control">
+              <option value="">-- Đang nạp danh mục sổ --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phòng ban phụ trách xử lý</label>
+            <select id="receive-department" class="form-control">
+              <option value="">-- Đang nạp phòng ban --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ngày ban hành ghi trên VB</label>
+            <input type="date" id="receive-issue-date" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ngày tiếp nhận vào sổ</label>
+            <input type="date" id="receive-received-date" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Độ khẩn</label>
+            <select id="receive-priority" class="form-control">
+              <option value="NORMAL">Bình thường</option>
+              <option value="URGENT">Khẩn</option>
+              <option value="VERY_URGENT">Thượng khẩn</option>
+              <option value="FLASH">Hỏa tốc</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Độ mật</label>
+            <select id="receive-confidentiality" class="form-control">
+              <option value="NORMAL">Bình thường</option>
+              <option value="CONFIDENTIAL">Mật</option>
+              <option value="TOP_SECRET">Tuyệt mật</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Trích yếu nội dung <span style="color:red">*</span></label>
+          <textarea id="receive-title" class="form-control" rows="3" placeholder="Tóm tắt ngắn gọn nội dung công văn..." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Tệp tin đính kèm (PDF / Scan)</label>
+          <input type="file" id="receive-file" class="form-control" accept=".pdf,.doc,.docx,.png,.jpg">
+          <small id="receive-file-info" style="color: var(--text-muted); display: block; margin-top: 4px;">
+            Tệp tin sẽ được tự động đồng bộ lên Google Drive theo cấu trúc năm/tháng.
+          </small>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="DMS.closeModal('modal-receive-doc')">Hủy bỏ</button>
+      <button class="btn btn-primary" id="btn-save-receive-doc" onclick="DMS.submitReceiveDoc()">
+        💾 Lưu vào sổ văn bản
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 2. Modal Soạn thảo Văn bản Đi mới -->
+<div id="modal-draft-doc" class="modal-backdrop">
+  <div class="modal-dialog modal-dialog-lg">
+    <div class="modal-header">
+      <div class="modal-title">✍️ Khởi Tạo Dự Thảo Văn Bản Đi</div>
+      <button class="modal-close" onclick="DMS.closeModal('modal-draft-doc')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-draft-doc">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label class="form-label">Loại văn bản <span style="color:red">*</span></label>
+            <select id="draft-category" class="form-control" required>
+              <option value="">-- Đang nạp danh mục sổ --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Đơn vị chủ trì / Soạn thảo <span style="color:red">*</span></label>
+            <select id="draft-department" class="form-control" required>
+              <option value="">-- Đang nạp phòng ban --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ký hiệu trích yếu</label>
+            <input type="text" id="draft-symbol" class="form-control" placeholder="Ví dụ: TT-CNTT">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Độ khẩn</label>
+            <select id="draft-priority" class="form-control">
+              <option value="NORMAL">Bình thường</option>
+              <option value="URGENT">Khẩn</option>
+              <option value="VERY_URGENT">Thượng khẩn</option>
+              <option value="FLASH">Hỏa tốc</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Độ mật</label>
+            <select id="draft-confidentiality" class="form-control">
+              <option value="NORMAL">Bình thường</option>
+              <option value="CONFIDENTIAL">Mật</option>
+              <option value="TOP_SECRET">Tuyệt mật</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Trích yếu nội dung <span style="color:red">*</span></label>
+          <textarea id="draft-title" class="form-control" rows="3" placeholder="Nhập trích yếu dự thảo..." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Đính kèm tệp bản thảo (DOCX / PDF)</label>
+          <input type="file" id="draft-file" class="form-control" accept=".pdf,.doc,.docx">
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="DMS.closeModal('modal-draft-doc')">Hủy bỏ</button>
+      <button class="btn btn-primary" id="btn-save-draft-doc" onclick="DMS.submitDraftDoc()">
+        💾 Lưu dự thảo
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 3. Modal Phân công Xử lý (Giao việc) -->
+<div id="modal-assign-doc" class="modal-backdrop">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <div class="modal-title">👥 Phân Công Xử Lý Văn Bản</div>
+      <button class="modal-close" onclick="DMS.closeModal('modal-assign-doc')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-assign-doc">
+        <input type="hidden" id="assign-doc-id">
+        
+        <div class="form-group">
+          <label class="form-label">Cán bộ Chủ trì chính (PRIMARY) <span style="color:red">*</span></label>
+          <select id="assign-primary-user" class="form-control" required>
+            <!-- Users list -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Cán bộ Phối hợp (COORDINATE - nếu có)</label>
+          <select id="assign-coordinate-user" class="form-control">
+            <option value="">-- Không có cán bộ phối hợp --</option>
+            <!-- Users list -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Thời hạn hoàn thành (Deadline) <span style="color:red">*</span></label>
+          <input type="date" id="assign-deadline" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Ý kiến chỉ đạo / Ghi chú giao việc</label>
+          <textarea id="assign-notes" class="form-control" rows="3" placeholder="Chỉ đạo cụ thể của Lãnh đạo hoặc Trưởng phòng..."></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="DMS.closeModal('modal-assign-doc')">Hủy bỏ</button>
+      <button class="btn btn-primary" id="btn-save-assignment" onclick="DMS.submitAssignment()">
+        🚀 Xác nhận giao việc
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 4. Modal Chuyển đổi trạng thái quy trình FSM -->
+<div id="modal-workflow-action" class="modal-backdrop">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <div class="modal-title" id="workflow-action-title">Xác nhận Thao tác</div>
+      <button class="modal-close" onclick="DMS.closeModal('modal-workflow-action')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="workflow-action-name">
+      <p id="workflow-action-desc" style="margin-bottom: 16px; font-size: 14px;"></p>
+      
+      <div class="form-group">
+        <label class="form-label">Ý kiến nhận xét / Lý do (nếu yêu cầu sửa hoặc chỉ đạo)</label>
+        <textarea id="workflow-action-comment" class="form-control" rows="3" placeholder="Nhập nhận xét hoặc ý kiến duyệt..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="DMS.closeModal('modal-workflow-action')">Hủy</button>
+      <button class="btn btn-primary" id="btn-submit-workflow-action" onclick="DMS.submitWorkflowAction()">
+        Đồng ý thực hiện
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 5. Modal Tài khoản người dùng -->
+<div id="modal-user-form" class="modal-backdrop">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <div class="modal-title" id="user-modal-title">Thông tin Tài khoản</div>
+      <button class="modal-close" onclick="DMS.closeModal('modal-user-form')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-user-edit">
+        <input type="hidden" id="user-form-id">
+        <div class="form-group">
+          <label class="form-label">Tên đăng nhập <span style="color:red">*</span></label>
+          <input type="text" id="user-form-username" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Họ và tên <span style="color:red">*</span></label>
+          <input type="text" id="user-form-fullname" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mật khẩu (để trống nếu không đổi)</label>
+          <input type="password" id="user-form-password" class="form-control">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Số điện thoại</label>
+            <input type="text" id="user-form-phone" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" id="user-form-email" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phòng ban</label>
+            <select id="user-form-dept" class="form-control"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Vai trò chính</label>
+            <select id="user-form-role" class="form-control"></select>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="DMS.closeModal('modal-user-form')">Đóng</button>
+      <button class="btn btn-primary" id="btn-save-user" onclick="DMS.submitUserForm()">💾 Lưu người dùng</button>
+    </div>
+  </div>
+</div>
+
+<!-- 6. Modal Phòng ban -->
+<div id="modal-dept-form" class="modal-backdrop">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <div class="modal-title" id="dept-modal-title">Thông tin Phòng ban / Cơ cấu</div>
+      <button class="modal-close" onclick="DMS.closeModal('modal-dept-form')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-dept-edit">
+        <input type="hidden" id="dept-form-id">
+        <div class="form-group">
+          <label class="form-label">Mã phòng ban (viết tắt) <span style="color:red">*</span></label>
+          <input type="text" id="dept-form-code" class="form-control" placeholder="Ví dụ: HCKT, CNTT..." required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tên phòng ban đầy đủ <span style="color:red">*</span></label>
+          <input type="text" id="dept-form-name" class="form-control" placeholder="Ví dụ: Phòng Hành chính Kế toán..." required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Trưởng phòng / Phụ trách đơn vị</label>
+          <select id="dept-form-manager" class="form-control">
+            <option value="">-- Chưa chỉ định --</option>
+          </select>
+          <small style="color: var(--text-muted); font-size: 11px;">Người chịu trách nhiệm chính tiếp nhận và giao việc trong phòng ban.</small>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Email phòng ban</label>
+            <input type="email" id="dept-form-email" class="form-control" placeholder="dept@company.vn">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Số điện thoại / Hotline</label>
+            <input type="text" id="dept-form-phone" class="form-control" placeholder="024...">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Trạng thái hoạt động</label>
+          <select id="dept-form-status" class="form-control">
+            <option value="ACTIVE">Hoạt động (ACTIVE)</option>
+            <option value="INACTIVE">Khóa / Tạm dừng (INACTIVE)</option>
+          </select>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="DMS.closeModal('modal-dept-form')">Hủy bỏ</button>
+      <button class="btn btn-primary" id="btn-save-department" onclick="DMS.submitDepartmentForm()">💾 Lưu phòng ban</button>
+    </div>
+  </div>
+</div>
+
+<!-- 7. Modal Vai trò & Quyền hạn -->
+<div id="modal-role-form" class="modal-backdrop">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <div class="modal-title" id="role-modal-title">Thông tin Vai trò</div>
+      <button class="modal-close" onclick="DMS.closeModal('modal-role-form')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-role-edit">
+        <input type="hidden" id="role-form-id">
+        <div class="form-group">
+          <label class="form-label">Mã vai trò (Code) <span style="color:red">*</span></label>
+          <input type="text" id="role-form-code" class="form-control" placeholder="Ví dụ: Auditor, Accountant..." required>
+          <small style="color: var(--text-muted); font-size: 11px;">Mã vai trò viết liền không dấu, dùng để định danh phân quyền.</small>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tên hiển thị vai trò <span style="color:red">*</span></label>
+          <input type="text" id="role-form-name" class="form-control" placeholder="Ví dụ: Kiểm soát viên, Kế toán trưởng..." required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mô tả chức trách & nhiệm vụ</label>
+          <textarea id="role-form-description" class="form-control" rows="3" placeholder="Mô tả phạm vi quyền hạn và nhiệm vụ của vai trò..."></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="DMS.closeModal('modal-role-form')">Hủy bỏ</button>
+      <button class="btn btn-primary" id="btn-save-role" onclick="DMS.submitRoleForm()">💾 Lưu vai trò</button>
+    </div>
+  </div>
+</div>
+
+<!-- 8. Modal Loại Sổ & Loại Văn Bản -->
+<div id="modal-doctype-form" class="modal-backdrop">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <div class="modal-title" id="doctype-modal-title">Thông tin Loại Sổ & Loại Văn Bản</div>
+      <button class="modal-close" onclick="DMS.closeModal('modal-doctype-form')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-doctype-edit">
+        <input type="hidden" id="doctype-form-id">
+        <div class="form-group">
+          <label class="form-label">Mã code định danh <span style="color:red">*</span></label>
+          <input type="text" id="doctype-form-code" class="form-control" placeholder="Ví dụ: DT_TT, DT_QD, DT_KH..." required>
+          <small style="color: var(--text-muted); font-size: 11px;">Mã code viết hoa không dấu, tiền tố DT_ (VD: DT_TB, DT_CV...).</small>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tên loại sổ / văn bản <span style="color:red">*</span></label>
+          <input type="text" id="doctype-form-name" class="form-control" placeholder="Ví dụ: Công văn, Quyết định, Tờ trình..." required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tiền tố viết tắt số hiệu</label>
+          <input type="text" id="doctype-form-prefix" class="form-control" placeholder="Ví dụ: CV, QĐ, TTr, TB...">
+          <small style="color: var(--text-muted); font-size: 11px;">Dùng tự động ghép khi cấp số văn bản (VD: /QĐ-UBND).</small>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mô tả / Phạm vi áp dụng</label>
+          <textarea id="doctype-form-description" class="form-control" rows="2" placeholder="Ghi chú thêm về quy cách quản lý hoặc mục đích loại sổ..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Trạng thái</label>
+          <select id="doctype-form-status" class="form-control">
+            <option value="ACTIVE">Hoạt động (Đang áp dụng)</option>
+            <option value="INACTIVE">Khóa (Tạm ngừng sử dụng)</option>
+          </select>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="DMS.closeModal('modal-doctype-form')">Hủy bỏ</button>
+      <button class="btn btn-primary" id="btn-save-doctype" onclick="DMS.submitDocumentTypeForm()">💾 Lưu loại sổ</button>
+    </div>
+  </div>
+</div>
+
+<!-- 9. Modal Cập nhật Tiến độ Nhiệm vụ (My Tasks) -->
+<div id="modal-update-task-progress" class="modal-backdrop">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <div class="modal-title">📝 Cập Nhật Tiến Độ Nhiệm Vụ</div>
+      <button class="modal-close" onclick="DMS.closeModal('modal-update-task-progress')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-update-task-progress">
+        <input type="hidden" id="task-progress-assignment-id">
+        <div class="form-group">
+          <label class="form-label">Trạng thái tiến độ <span style="color:red">*</span></label>
+          <select id="task-progress-status" class="form-control" required>
+            <option value="PENDING">Chờ xử lý (PENDING)</option>
+            <option value="IN_PROGRESS">Đang thực hiện (IN_PROGRESS)</option>
+            <option value="COMPLETED">Đã hoàn thành (COMPLETED)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ghi chú báo cáo tiến độ / Kết quả</label>
+          <textarea id="task-progress-notes" class="form-control" rows="3" placeholder="Nhập tóm tắt kết quả xử lý hoặc tài liệu báo cáo..."></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="DMS.closeModal('modal-update-task-progress')">Hủy bỏ</button>
+      <button class="btn btn-primary" id="btn-save-task-progress" onclick="DMS.submitTaskProgress()">💾 Lưu tiến độ</button>
+    </div>
+  </div>
+</div>
+
+<!-- 10. Modal Cấu hình Sổ Cấp Số Tự Động -->
+<div id="modal-edit-numbering" class="modal-backdrop">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <div class="modal-title">🔢 Thiết Lập Sổ Cấp Số Nhảy Văn Bản Đi</div>
+      <button class="modal-close" onclick="DMS.closeModal('modal-edit-numbering')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-edit-numbering">
+        <input type="hidden" id="numbering-form-doctype">
+        <div class="form-group">
+          <label class="form-label">Loại sổ / Loại văn bản</label>
+          <input type="text" id="numbering-form-typename" class="form-control" readonly style="background: #f1f5f9; font-weight: 600;">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label class="form-label">Năm áp dụng <span style="color:red">*</span></label>
+            <input type="number" id="numbering-form-year" class="form-control" required readonly style="background: #f1f5f9;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Số phát hành hiện tại <span style="color:red">*</span></label>
+            <input type="number" id="numbering-form-current" class="form-control" min="0" required oninput="DMS.updateNumberingPreview()">
+            <small style="color: var(--text-muted); font-size: 11px;">Số tiếp theo sẽ là: <strong>+1</strong></small>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mẫu tiền tố số hiệu (Prefix) <span style="color:red">*</span></label>
+          <input type="text" id="numbering-form-prefix" class="form-control" placeholder="Ví dụ: CV-DMS, QD-UBND..." required oninput="DMS.updateNumberingPreview()">
+          <small style="color: var(--text-muted); font-size: 11px;">Mẫu ghép vào đuôi số hiệu khi phát hành văn bản đi.</small>
+        </div>
+        <div class="form-group" style="background: #f8fafc; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+          <label class="form-label" style="margin-bottom: 4px; color: var(--primary);">👀 Mẫu số phát hành tiếp theo dự kiến:</label>
+          <div id="numbering-preview-box" style="font-family: monospace; font-size: 16px; font-weight: 700; color: var(--primary);">1/CV-DMS</div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="DMS.closeModal('modal-edit-numbering')">Hủy bỏ</button>
+      <button class="btn btn-primary" id="btn-save-numbering" onclick="DMS.submitNumberingConfig()">💾 Lưu cấu hình số</button>
+    </div>
+  </div>
+</div>
+
+<!-- 10. Modal Hồ sơ Pháp lý Doanh nghiệp -->
+<div id="modal-legal-record-form" class="modal-backdrop">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <div class="modal-title" id="legal-record-modal-title">Thông tin Hồ sơ Pháp lý</div>
+      <button class="modal-close" onclick="DMS.closeModal('modal-legal-record-form')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-legal-record-edit">
+        <input type="hidden" id="legal-form-id">
+        <input type="hidden" id="legal-form-file-id">
+        <input type="hidden" id="legal-form-file-name">
+        <div class="form-group">
+          <label class="form-label">Loại hồ sơ pháp lý <span style="color:red">*</span></label>
+          <select id="legal-form-type" class="form-control" required>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tên / Trích yếu hồ sơ <span style="color:red">*</span></label>
+          <input type="text" id="legal-form-title" class="form-control" placeholder="Ví dụ: Giấy chứng nhận đăng ký doanh nghiệp lần đầu..." required>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Số hiệu văn bản / giấy phép</label>
+            <input type="text" id="legal-form-number" class="form-control" placeholder="Ví dụ: 0401234567...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cơ quan cấp / ban hành</label>
+            <input type="text" id="legal-form-authority" class="form-control" placeholder="Ví dụ: Sở KH&ĐT TP...">
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Ngày cấp / ngày ký</label>
+            <input type="date" id="legal-form-issue-date" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hiệu lực đến ngày</label>
+            <input type="date" id="legal-form-expiry-date" class="form-control">
+            <small style="color: var(--text-muted); font-size: 11px;">Để trống nếu hồ sơ không có thời hạn hiệu lực (VD: Điều lệ, Biên bản họp).</small>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tệp tin đính kèm (Scan / PDF)</label>
+          <input type="file" id="legal-form-file" class="form-control" accept=".pdf,.doc,.docx,.png,.jpg">
+          <small id="legal-form-file-info" style="color: var(--text-muted); display: block; margin-top: 4px;">
+            Tệp tin sẽ được tự động đồng bộ và lưu trữ trên Google Drive.
+          </small>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Trạng thái lưu trữ</label>
+          <select id="legal-form-status" class="form-control">
+            <option value="ACTIVE">Đang lưu hành</option>
+            <option value="ARCHIVED">Đã lưu trữ</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ghi chú</label>
+          <textarea id="legal-form-notes" class="form-control" rows="2" placeholder="Ghi chú thêm về hồ sơ..."></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="DMS.closeModal('modal-legal-record-form')">Hủy bỏ</button>
+      <button class="btn btn-primary" id="btn-save-legal-record" onclick="DMS.submitLegalRecordForm()">💾 Lưu hồ sơ pháp lý</button>
+    </div>
+  </div>
+</div>
+
+

@@ -131,6 +131,7 @@ var APP = {
       outgoing_docs: "📤 Quản Lý Sổ Văn Bản Đi & Dự Thảo",
       departments: "🏢 Danh Mục Cơ Cấu Phòng Ban",
       document_types: "📚 Danh Mục Loại Sổ & Loại Văn Bản",
+      legal_records: "📜 Hồ Sơ Pháp Lý Doanh Nghiệp",
       users: "👥 Quản Trị Tài Khoản & Phân Quyền",
       settings: "⚙️ Cấu Hình Hệ Thống & Sổ Cấp Số",
       audit: "🛡️ Nhật Ký Kiểm Toán Hệ Thống",
@@ -144,6 +145,7 @@ var APP = {
     else if (viewName === "outgoing_docs") { DMS.populateCategorySelects(); DMS.populateDepartmentSelects(); DMS.loadOutgoingDocs(1, params); }
     else if (viewName === "departments") DMS.loadDepartments();
     else if (viewName === "document_types") DMS.loadDocumentTypes();
+    else if (viewName === "legal_records") DMS.loadLegalRecords(1);
     else if (viewName === "users") { DMS.populateDepartmentSelects(); DMS.loadUsers(1); }
     else if (viewName === "settings") DMS.loadSettings();
     else if (viewName === "audit") DMS.loadAuditLogs(1);
@@ -225,7 +227,8 @@ var APP = {
     var container = document.getElementById("toast-container");
     var toast = document.createElement("div");
     toast.className = "toast " + (type === "success" ? "toast-success" : "toast-error");
-    toast.innerHTML = (type === "success" ? "✅ " : "⚠️ ") + message;
+    var safeMessage = (typeof DMS !== "undefined" && DMS.escapeHtml) ? DMS.escapeHtml(message) : String(message == null ? "" : message);
+    toast.innerHTML = (type === "success" ? "✅ " : "⚠️ ") + safeMessage;
     container.appendChild(toast);
     setTimeout(function() {
       toast.style.opacity = "0";
@@ -430,12 +433,12 @@ var DMS = {
           }
         }
         html += '<tr>' +
-          '<td><strong>' + (t.document_no || t.document_id) + '</strong></td>' +
-          '<td>' + t.title + '</td>' +
+          '<td><strong>' + DMS.escapeHtml(t.document_no || t.document_id) + '</strong></td>' +
+          '<td>' + DMS.escapeHtml(t.title) + '</td>' +
           '<td>' + roleBadge + '</td>' +
           '<td>' + deadHtml + '</td>' +
           '<td>' + prioBadge + '</td>' +
-          '<td><span class="badge badge-warning">' + t.status + '</span></td>' +
+          '<td><span class="badge badge-warning">' + DMS.escapeHtml(t.status) + '</span></td>' +
           '<td><button class="btn btn-secondary btn-sm" onclick="DMS.viewDocumentDetail(\'' + t.document_id + '\')">Xem & Xử lý</button></td>' +
           '</tr>';
       });
@@ -452,11 +455,11 @@ var DMS = {
       appList.forEach(function(d) {
         var typeBadge = (d.document_type === "INCOMING") ? '<span class="badge badge-primary">VB Đến</span>' : '<span class="badge badge-warning">VB Đi</span>';
         aHtml += '<tr>' +
-          '<td><strong>' + (d.document_no || d.id) + '</strong></td>' +
+          '<td><strong>' + DMS.escapeHtml(d.document_no || d.id) + '</strong></td>' +
           '<td>' + typeBadge + '</td>' +
-          '<td>' + d.title + '</td>' +
-          '<td><span class="badge badge-warning">' + d.status + '</span></td>' +
-          '<td>' + (d.issuer || "Nội bộ") + '</td>' +
+          '<td>' + DMS.escapeHtml(d.title) + '</td>' +
+          '<td><span class="badge badge-warning">' + DMS.escapeHtml(d.status) + '</span></td>' +
+          '<td>' + DMS.escapeHtml(d.issuer || "Nội bộ") + '</td>' +
           '<td><button class="btn btn-primary btn-sm" onclick="DMS.viewDocumentDetail(\'' + d.id + '\')">Ký duyệt / Chỉ đạo</button></td>' +
           '</tr>';
       });
@@ -509,12 +512,12 @@ var DMS = {
           var html = "";
           list.forEach(function(item) {
             html += '<tr>' +
-              '<td><span style="font-family: monospace; font-weight:600;">' + item.id + '</span></td>' +
-              '<td><strong>' + (item.document_no || "-") + '</strong></td>' +
-              '<td>' + (item.received_date || "-") + '</td>' +
-              '<td>' + (item.issuer || "-") + '</td>' +
-              '<td><span class="badge badge-info">' + (item.department_name || "-") + '</span></td>' +
-              '<td>' + item.title + '</td>' +
+              '<td><span style="font-family: monospace; font-weight:600;">' + DMS.escapeHtml(item.id) + '</span></td>' +
+              '<td><strong>' + DMS.escapeHtml(item.document_no || "-") + '</strong></td>' +
+              '<td>' + DMS.escapeHtml(item.received_date || "-") + '</td>' +
+              '<td>' + DMS.escapeHtml(item.issuer || "-") + '</td>' +
+              '<td><span class="badge badge-info">' + DMS.escapeHtml(item.department_name || "-") + '</span></td>' +
+              '<td>' + DMS.escapeHtml(item.title) + '</td>' +
               '<td>' + DMS.getPriorityBadge(item.priority) + '</td>' +
               '<td>' + DMS.getStatusBadge(item.status) + '</td>' +
               '<td><button class="btn btn-secondary btn-sm" onclick="DMS.viewDocumentDetail(\'' + item.id + '\')">Xem chi tiết</button></td>' +
@@ -608,13 +611,13 @@ var DMS = {
               '</div>';
 
             html += '<tr>' +
-              '<td><span style="font-family: monospace; font-size:11px; color:var(--text-muted);">' + item.id + '</span></td>' +
-              '<td><strong>' + (item.document_no || "-") + '</strong><br><span style="font-size:12px; color:var(--text);">' + (item.title || "") + '</span></td>' +
+              '<td><span style="font-family: monospace; font-size:11px; color:var(--text-muted);">' + DMS.escapeHtml(item.id) + '</span></td>' +
+              '<td><strong>' + DMS.escapeHtml(item.document_no || "-") + '</strong><br><span style="font-size:12px; color:var(--text);">' + DMS.escapeHtml(item.title || "") + '</span></td>' +
               '<td>' + roleBadge + '</td>' +
               '<td>' + deadlineHtml + '</td>' +
               '<td>' + DMS.getPriorityBadge(item.priority) + '</td>' +
               '<td>' + statusBadge + '</td>' +
-              '<td><span style="font-size: 12px; color: var(--text-muted);">' + (item.notes || "-") + '</span></td>' +
+              '<td><span style="font-size: 12px; color: var(--text-muted);">' + DMS.escapeHtml(item.notes || "-") + '</span></td>' +
               '<td>' + actionBtns + '</td>' +
               '</tr>';
           });
@@ -733,12 +736,12 @@ var DMS = {
           var html = "";
           list.forEach(function(item) {
             html += '<tr>' +
-              '<td><span style="font-family: monospace; font-weight:600;">' + item.id + '</span></td>' +
-              '<td><strong>' + (item.document_no ? ('<span class="badge badge-success" style="font-size:12px;">' + item.document_no + '</span>') : '<em style="color:var(--text-muted);">Chưa cấp số</em>') + '</strong></td>' +
-              '<td>' + item.title + '</td>' +
-              '<td>' + item.category_id + '</td>' +
-              '<td><span class="badge badge-info">' + (item.department_name || "-") + '</span></td>' +
-              '<td>' + (item.created_at ? item.created_at.substring(0, 10) : "-") + '</td>' +
+              '<td><span style="font-family: monospace; font-weight:600;">' + DMS.escapeHtml(item.id) + '</span></td>' +
+              '<td><strong>' + (item.document_no ? ('<span class="badge badge-success" style="font-size:12px;">' + DMS.escapeHtml(item.document_no) + '</span>') : '<em style="color:var(--text-muted);">Chưa cấp số</em>') + '</strong></td>' +
+              '<td>' + DMS.escapeHtml(item.title) + '</td>' +
+              '<td>' + DMS.escapeHtml(item.category_id) + '</td>' +
+              '<td><span class="badge badge-info">' + DMS.escapeHtml(item.department_name || "-") + '</span></td>' +
+              '<td>' + DMS.escapeHtml(item.created_at ? item.created_at.substring(0, 10) : "-") + '</td>' +
               '<td>' + DMS.getStatusBadge(item.status) + '</td>' +
               '<td><button class="btn btn-secondary btn-sm" onclick="DMS.viewDocumentDetail(\'' + item.id + '\')">Xem chi tiết</button></td>' +
               '</tr>';
@@ -902,9 +905,9 @@ var DMS = {
         var roleTag = (a.role === "PRIMARY") ? '<span class="badge badge-danger">Chủ trì</span>' : '<span class="badge badge-secondary">Phối hợp</span>';
         asHtml += '<div style="padding: 10px; border-bottom: 1px solid var(--border);">' +
           '<div style="display:flex; justify-content:space-between; align-items:center;">' +
-            '<strong>' + (a.assignee_name || a.assignee_id) + '</strong>' + roleTag +
+            '<strong>' + DMS.escapeHtml(a.assignee_name || a.assignee_id) + '</strong>' + roleTag +
           '</div>' +
-          '<div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Hạn: ' + (a.deadline || "-") + ' | Trạng thái: ' + a.status + '</div>' +
+          '<div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Hạn: ' + DMS.escapeHtml(a.deadline || "-") + ' | Trạng thái: ' + DMS.escapeHtml(a.status) + '</div>' +
           '</div>';
       });
       asnList.innerHTML = asHtml;
@@ -918,9 +921,9 @@ var DMS = {
       var hHtml = "";
       data.histories.forEach(function(h) {
         hHtml += '<div style="margin-bottom: 12px; padding-left: 10px; border-left: 2px solid var(--primary);">' +
-          '<div style="font-weight: 600;">' + h.action + ' &rarr; ' + h.to_status + '</div>' +
-          '<div style="font-size: 11px; color: var(--text-muted);">' + (h.actor_name || h.actor_id) + ' • ' + h.created_at + '</div>' +
-          (h.comment ? ('<div style="font-style:italic; margin-top:2px; color:#475569;">"' + h.comment + '"</div>') : '') +
+          '<div style="font-weight: 600;">' + DMS.escapeHtml(h.action) + ' &rarr; ' + DMS.escapeHtml(h.to_status) + '</div>' +
+          '<div style="font-size: 11px; color: var(--text-muted);">' + DMS.escapeHtml(h.actor_name || h.actor_id) + ' • ' + DMS.escapeHtml(h.created_at) + '</div>' +
+          (h.comment ? ('<div style="font-style:italic; margin-top:2px; color:#475569;">"' + DMS.escapeHtml(h.comment) + '"</div>') : '') +
           '</div>';
       });
       hisList.innerHTML = hHtml;
@@ -935,9 +938,9 @@ var DMS = {
       data.comments.forEach(function(c) {
         cHtml += '<div style="background: #f8fafc; padding: 8px 12px; border-radius: var(--radius-sm); margin-bottom: 8px;">' +
           '<div style="display:flex; justify-content:space-between; font-size: 11px; color: var(--text-muted);">' +
-            '<strong>' + c.user_id + '</strong><span>' + c.created_at + '</span>' +
+            '<strong>' + DMS.escapeHtml(c.user_id) + '</strong><span>' + DMS.escapeHtml(c.created_at) + '</span>' +
           '</div>' +
-          '<div style="margin-top: 4px; font-size: 13px;">' + c.content + '</div>' +
+          '<div style="margin-top: 4px; font-size: 13px;">' + DMS.escapeHtml(c.content) + '</div>' +
           '</div>';
       });
       cmtList.innerHTML = cHtml;
@@ -1205,7 +1208,7 @@ var DMS = {
             optGroupC.label = "🏢 " + dept;
 
             grouped[dept].forEach(function(u) {
-              var label = u.full_name + " (" + u.username + " - " + (u.primary_role_name || "Nhân viên") + ")";
+              var label = DMS.escapeHtml(u.full_name) + " (" + DMS.escapeHtml(u.username) + " - " + DMS.escapeHtml(u.primary_role_name || "Nhân viên") + ")";
               var optP = new Option(label, u.id);
               var optC = new Option(label, u.id);
               optGroupP.appendChild(optP);
@@ -1350,7 +1353,7 @@ var DMS = {
               ? '<span class="badge badge-success">Hoạt động</span>'
               : '<span class="badge badge-danger">Đã khóa</span>';
 
-            var safeName = (d.name || "").replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            var safeName = DMS.escapeAttr(d.name || "");
 
             var actions = '<div style="display: flex; gap: 6px; flex-wrap: wrap;">';
             actions += '<button class="btn btn-secondary btn-sm" onclick="DMS.openDepartmentModal(\'' + d.id + '\')">Sửa</button>';
@@ -1369,12 +1372,12 @@ var DMS = {
             actions += '</div>';
 
             html += '<tr>' +
-              '<td><span style="font-family: monospace; font-weight:600;">' + d.id + '</span>' + (d.is_system ? ' <span class="badge badge-secondary" style="font-size:10px;">Cốt lõi</span>' : '') + '</td>' +
-              '<td><span class="badge badge-primary">' + d.code + '</span></td>' +
-              '<td><strong>' + d.name + '</strong>' +
-                (d.email ? ('<br><small style="color:var(--text-muted);">' + d.email + '</small>') : '') +
+              '<td><span style="font-family: monospace; font-weight:600;">' + DMS.escapeHtml(d.id) + '</span>' + (d.is_system ? ' <span class="badge badge-secondary" style="font-size:10px;">Cốt lõi</span>' : '') + '</td>' +
+              '<td><span class="badge badge-primary">' + DMS.escapeHtml(d.code) + '</span></td>' +
+              '<td><strong>' + DMS.escapeHtml(d.name) + '</strong>' +
+                (d.email ? ('<br><small style="color:var(--text-muted);">' + DMS.escapeHtml(d.email) + '</small>') : '') +
               '</td>' +
-              '<td>' + (d.manager_name || '<em style="color:var(--text-muted);">Chưa chỉ định</em>') + '</td>' +
+              '<td>' + (d.manager_name ? DMS.escapeHtml(d.manager_name) : '<em style="color:var(--text-muted);">Chưa chỉ định</em>') + '</td>' +
               '<td style="text-align: center;"><span class="badge badge-info">' + (d.user_count || 0) + ' nhân sự</span></td>' +
               '<td style="text-align: center;"><span class="badge badge-secondary">' + (d.doc_count || 0) + ' VB</span></td>' +
               '<td>' + statusBadge + '</td>' +
@@ -1417,7 +1420,7 @@ var DMS = {
       managerSelect.innerHTML = '<option value="">-- Chưa chỉ định trưởng phòng --</option>';
       (users || []).forEach(function(u) {
         var sel = (u.id === selectedManager) ? "selected" : "";
-        managerSelect.innerHTML += '<option value="' + u.id + '" ' + sel + '>' + u.full_name + ' (' + u.username + ' - ' + (u.department_name || "") + ')</option>';
+        managerSelect.innerHTML += '<option value="' + u.id + '" ' + sel + '>' + DMS.escapeHtml(u.full_name) + ' (' + DMS.escapeHtml(u.username) + ' - ' + DMS.escapeHtml(u.department_name || "") + ')</option>';
       });
     }
 
@@ -1696,12 +1699,12 @@ var DMS = {
         var html = "";
         list.forEach(function(l) {
           html += '<tr>' +
-            '<td>' + l.event_at + '</td>' +
-            '<td><strong>' + (l.actor_name_snapshot || l.actor_username_snapshot) + '</strong></td>' +
-            '<td><span class="badge badge-secondary">' + l.action + '</span></td>' +
-            '<td>' + l.entity_type + '</td>' +
-            '<td><span style="font-family: monospace;">' + (l.entity_number_snapshot || l.entity_id) + '</span></td>' +
-            '<td>' + (l.message_snapshot || "-") + '</td>' +
+            '<td>' + DMS.escapeHtml(l.event_at) + '</td>' +
+            '<td><strong>' + DMS.escapeHtml(l.actor_name_snapshot || l.actor_username_snapshot) + '</strong></td>' +
+            '<td><span class="badge badge-secondary">' + DMS.escapeHtml(l.action) + '</span></td>' +
+            '<td>' + DMS.escapeHtml(l.entity_type) + '</td>' +
+            '<td><span style="font-family: monospace;">' + DMS.escapeHtml(l.entity_number_snapshot || l.entity_id) + '</span></td>' +
+            '<td>' + DMS.escapeHtml(l.message_snapshot || "-") + '</td>' +
             '</tr>';
         });
         tbody.innerHTML = html;
@@ -1739,7 +1742,7 @@ var DMS = {
         var filterDept = document.getElementById("users-filter-dept");
         if (filterDept && filterDept.options.length <= 1 && DMS.cachedDepartments && DMS.cachedDepartments.length > 0) {
           DMS.cachedDepartments.forEach(function(d) {
-            filterDept.innerHTML += '<option value="' + d.id + '">' + d.name + '</option>';
+            filterDept.innerHTML += '<option value="' + d.id + '">' + DMS.escapeHtml(d.name) + '</option>';
           });
         }
 
@@ -1749,12 +1752,12 @@ var DMS = {
             ? '<button class="btn btn-danger btn-sm" onclick="DMS.toggleUserLock(\'' + u.id + '\', true)">Khóa</button>'
             : '<button class="btn btn-success btn-sm" onclick="DMS.toggleUserLock(\'' + u.id + '\', false)">Mở</button>';
           html += '<tr>' +
-            '<td>' + u.id + '</td>' +
-            '<td><strong>' + u.username + '</strong></td>' +
-            '<td>' + u.full_name + '</td>' +
-            '<td>' + (u.department_name || "-") + '</td>' +
-            '<td><span class="badge badge-primary">' + (u.primary_role_name || u.primary_role_code || "-") + '</span></td>' +
-            '<td><span class="badge ' + (u.status === "ACTIVE" ? "badge-success" : "badge-danger") + '">' + u.status + '</span></td>' +
+            '<td>' + DMS.escapeHtml(u.id) + '</td>' +
+            '<td><strong>' + DMS.escapeHtml(u.username) + '</strong></td>' +
+            '<td>' + DMS.escapeHtml(u.full_name) + '</td>' +
+            '<td>' + DMS.escapeHtml(u.department_name || "-") + '</td>' +
+            '<td><span class="badge badge-primary">' + DMS.escapeHtml(u.primary_role_name || u.primary_role_code || "-") + '</span></td>' +
+            '<td><span class="badge ' + (u.status === "ACTIVE" ? "badge-success" : "badge-danger") + '">' + DMS.escapeHtml(u.status) + '</span></td>' +
             '<td><div style="display: flex; gap: 6px;">' +
               '<button class="btn btn-secondary btn-sm" onclick="DMS.openUserModal(\'' + u.id + '\')" title="Chỉnh sửa thông tin">Sửa</button>' +
               lockBtn +
@@ -1836,7 +1839,7 @@ var DMS = {
           var btnEdit = '<button class="btn btn-secondary btn-sm" onclick="DMS.openRoleModal(\'' + r.id + '\')" title="Chỉnh sửa thông tin vai trò">✏️ Sửa</button>';
           var btnDelete = '';
           if (!isSystem && (!r.user_count || r.user_count === 0)) {
-            var safeName = (r.name || r.code).replace(/'/g, "\\'");
+            var safeName = DMS.escapeAttr(r.name || r.code);
             btnDelete = '<button class="btn btn-danger btn-sm" onclick="DMS.deleteRole(\'' + r.id + '\', \'' + safeName + '\')" title="Xóa vai trò tùy chỉnh">🗑️ Xóa</button>';
           } else if (isSystem) {
             btnDelete = '<button class="btn btn-secondary btn-sm" disabled title="Vai trò hệ thống không được xóa" style="opacity: 0.5; cursor: not-allowed;">🔒 Cốt lõi</button>';
@@ -1845,9 +1848,9 @@ var DMS = {
           }
 
           html += '<tr>' +
-            '<td><code style="font-weight: 700; color: var(--primary);">' + (r.code || "") + '</code></td>' +
-            '<td><strong>' + (r.name || "") + '</strong></td>' +
-            '<td><span style="color: var(--text-muted); font-size: 12px;">' + (r.description || "-") + '</span></td>' +
+            '<td><code style="font-weight: 700; color: var(--primary);">' + DMS.escapeHtml(r.code || "") + '</code></td>' +
+            '<td><strong>' + DMS.escapeHtml(r.name || "") + '</strong></td>' +
+            '<td><span style="color: var(--text-muted); font-size: 12px;">' + DMS.escapeHtml(r.description || "-") + '</span></td>' +
             '<td>' + countBadge + '</td>' +
             '<td>' + badgeType + '</td>' +
             '<td><div style="display: flex; gap: 6px; flex-wrap: wrap;">' + btnMatrix + btnEdit + btnDelete + '</div></td>' +
@@ -2209,7 +2212,7 @@ var DMS = {
         deptSelect.innerHTML = '<option value="">-- Chọn phòng ban --</option>';
         DMS.cachedDepartments.forEach(function(d) {
           var sel = (d.id === selectedDept) ? "selected" : "";
-          deptSelect.innerHTML += '<option value="' + d.id + '" ' + sel + '>' + d.name + '</option>';
+          deptSelect.innerHTML += '<option value="' + d.id + '" ' + sel + '>' + DMS.escapeHtml(d.name) + '</option>';
         });
       } else {
         google.script.run.withSuccessHandler(function(res) {
@@ -2218,7 +2221,7 @@ var DMS = {
             deptSelect.innerHTML = '<option value="">-- Chọn phòng ban --</option>';
             res.data.forEach(function(d) {
               var sel = (d.id === selectedDept) ? "selected" : "";
-              deptSelect.innerHTML += '<option value="' + d.id + '" ' + sel + '>' + d.name + '</option>';
+              deptSelect.innerHTML += '<option value="' + d.id + '" ' + sel + '>' + DMS.escapeHtml(d.name) + '</option>';
             });
           }
         }).apiGetDepartmentsList(token);
@@ -2360,7 +2363,7 @@ var DMS = {
         receiveCat.innerHTML = '<option value="">-- Chọn loại sổ / văn bản --</option>';
         activeTypes.forEach(function(t) {
           var sel = (t.code === curValRec || t.id === curValRec) ? "selected" : "";
-          receiveCat.innerHTML += '<option value="' + t.code + '" ' + sel + '>' + t.name + ' (' + (t.prefix || t.code) + ')</option>';
+          receiveCat.innerHTML += '<option value="' + t.code + '" ' + sel + '>' + DMS.escapeHtml(t.name) + ' (' + DMS.escapeHtml(t.prefix || t.code) + ')</option>';
         });
       }
 
@@ -2369,7 +2372,7 @@ var DMS = {
         draftCat.innerHTML = '<option value="">-- Chọn loại sổ / văn bản --</option>';
         activeTypes.forEach(function(t) {
           var sel = (t.code === curValDraft || t.id === curValDraft) ? "selected" : "";
-          draftCat.innerHTML += '<option value="' + t.code + '" ' + sel + '>' + t.name + ' (' + (t.prefix || t.code) + ')</option>';
+          draftCat.innerHTML += '<option value="' + t.code + '" ' + sel + '>' + DMS.escapeHtml(t.name) + ' (' + DMS.escapeHtml(t.prefix || t.code) + ')</option>';
         });
       }
 
@@ -2378,7 +2381,7 @@ var DMS = {
         incomingFilterCat.innerHTML = '<option value="ALL">Tất cả loại văn bản</option>';
         types.forEach(function(t) {
           var sel = (t.code === curFilterInc) ? "selected" : "";
-          incomingFilterCat.innerHTML += '<option value="' + t.code + '" ' + sel + '>' + t.name + ' (' + (t.prefix || t.code) + ')</option>';
+          incomingFilterCat.innerHTML += '<option value="' + t.code + '" ' + sel + '>' + DMS.escapeHtml(t.name) + ' (' + DMS.escapeHtml(t.prefix || t.code) + ')</option>';
         });
       }
 
@@ -2387,7 +2390,7 @@ var DMS = {
         outgoingFilterCat.innerHTML = '<option value="ALL">Tất cả loại văn bản</option>';
         types.forEach(function(t) {
           var sel = (t.code === curFilterOut) ? "selected" : "";
-          outgoingFilterCat.innerHTML += '<option value="' + t.code + '" ' + sel + '>' + t.name + ' (' + (t.prefix || t.code) + ')</option>';
+          outgoingFilterCat.innerHTML += '<option value="' + t.code + '" ' + sel + '>' + DMS.escapeHtml(t.name) + ' (' + DMS.escapeHtml(t.prefix || t.code) + ')</option>';
         });
       }
 
@@ -2428,7 +2431,7 @@ var DMS = {
         receiveDept.innerHTML = '<option value="">-- Chọn phòng ban phụ trách --</option>';
         activeDepts.forEach(function(d) {
           var sel = (d.id === curValRec) ? "selected" : "";
-          receiveDept.innerHTML += '<option value="' + d.id + '" ' + sel + '>' + d.name + ' (' + d.code + ')</option>';
+          receiveDept.innerHTML += '<option value="' + d.id + '" ' + sel + '>' + DMS.escapeHtml(d.name) + ' (' + DMS.escapeHtml(d.code) + ')</option>';
         });
       }
 
@@ -2437,7 +2440,7 @@ var DMS = {
         draftDept.innerHTML = '<option value="">-- Chọn phòng ban soạn thảo --</option>';
         activeDepts.forEach(function(d) {
           var sel = (d.id === curValDraft) ? "selected" : "";
-          draftDept.innerHTML += '<option value="' + d.id + '" ' + sel + '>' + d.name + ' (' + d.code + ')</option>';
+          draftDept.innerHTML += '<option value="' + d.id + '" ' + sel + '>' + DMS.escapeHtml(d.name) + ' (' + DMS.escapeHtml(d.code) + ')</option>';
         });
       }
 
@@ -2447,7 +2450,7 @@ var DMS = {
         depts.forEach(function(d) {
           if (d.status !== "DELETED") {
             var sel = (d.id === curFilterInc) ? "selected" : "";
-            incomingFilterDept.innerHTML += '<option value="' + d.id + '" ' + sel + '>' + d.name + '</option>';
+            incomingFilterDept.innerHTML += '<option value="' + d.id + '" ' + sel + '>' + DMS.escapeHtml(d.name) + '</option>';
           }
         });
       }
@@ -2458,7 +2461,7 @@ var DMS = {
         depts.forEach(function(d) {
           if (d.status !== "DELETED") {
             var sel = (d.id === curFilterOut) ? "selected" : "";
-            outgoingFilterDept.innerHTML += '<option value="' + d.id + '" ' + sel + '>' + d.name + '</option>';
+            outgoingFilterDept.innerHTML += '<option value="' + d.id + '" ' + sel + '>' + DMS.escapeHtml(d.name) + '</option>';
           }
         });
       }
@@ -2469,7 +2472,7 @@ var DMS = {
         depts.forEach(function(d) {
           if (d.status !== "DELETED") {
             var sel = (d.id === curFilterUser) ? "selected" : "";
-            usersFilterDept.innerHTML += '<option value="' + d.id + '" ' + sel + '>' + d.name + '</option>';
+            usersFilterDept.innerHTML += '<option value="' + d.id + '" ' + sel + '>' + DMS.escapeHtml(d.name) + '</option>';
           }
         });
       }
@@ -2479,7 +2482,7 @@ var DMS = {
         userFormDept.innerHTML = '<option value="">-- Chọn phòng ban --</option>';
         activeDepts.forEach(function(d) {
           var sel = (d.id === curUserForm) ? "selected" : "";
-          userFormDept.innerHTML += '<option value="' + d.id + '" ' + sel + '>' + d.name + '</option>';
+          userFormDept.innerHTML += '<option value="' + d.id + '" ' + sel + '>' + DMS.escapeHtml(d.name) + '</option>';
         });
       }
 
@@ -2538,7 +2541,7 @@ var DMS = {
 
           var btnDelete = '';
           if (!isSystem && (!dt.document_count || dt.document_count === 0)) {
-            var safeName = (dt.name || dt.code).replace(/'/g, "\\'");
+            var safeName = DMS.escapeAttr(dt.name || dt.code);
             btnDelete = '<button class="btn btn-danger btn-sm" onclick="DMS.deleteDocumentType(\'' + dt.id + '\', \'' + safeName + '\')" title="Xóa loại sổ">🗑️ Xóa</button>';
           } else if (isSystem) {
             btnDelete = '<button class="btn btn-secondary btn-sm" disabled title="Loại sổ hệ thống cốt lõi không được xóa" style="opacity: 0.5; cursor: not-allowed;">🔒 Cốt lõi</button>';
@@ -2547,11 +2550,11 @@ var DMS = {
           }
 
           html += '<tr>' +
-            '<td><span style="font-family: monospace; font-size: 11px; color: var(--text-muted);">' + (dt.id || "") + '</span></td>' +
-            '<td><code style="font-weight: 700; color: var(--primary);">' + (dt.code || "") + '</code></td>' +
-            '<td><strong>' + (dt.name || "") + '</strong></td>' +
-            '<td><span class="badge" style="background:#e0f2fe; color:#0369a1; font-family: monospace;">' + (dt.prefix || "-") + '</span></td>' +
-            '<td><span style="color: var(--text-muted); font-size: 12px;">' + (dt.description || "-") + '</span></td>' +
+            '<td><span style="font-family: monospace; font-size: 11px; color: var(--text-muted);">' + DMS.escapeHtml(dt.id || "") + '</span></td>' +
+            '<td><code style="font-weight: 700; color: var(--primary);">' + DMS.escapeHtml(dt.code || "") + '</code></td>' +
+            '<td><strong>' + DMS.escapeHtml(dt.name || "") + '</strong></td>' +
+            '<td><span class="badge" style="background:#e0f2fe; color:#0369a1; font-family: monospace;">' + DMS.escapeHtml(dt.prefix || "-") + '</span></td>' +
+            '<td><span style="color: var(--text-muted); font-size: 12px;">' + DMS.escapeHtml(dt.description || "-") + '</span></td>' +
             '<td>' + countBadge + '</td>' +
             '<td>' + statusBadge + '</td>' +
             '<td><div style="display: flex; gap: 6px; flex-wrap: wrap;">' + btnEdit + toggleBtn + btnDelete + '</div></td>' +
@@ -2714,6 +2717,295 @@ var DMS = {
         APP.toast("Lỗi hệ thống: " + (err.message || err), "error");
       })
       .apiDeleteDocumentType(typeId, token);
+  },
+
+  // ===== Quản lý Hồ sơ Pháp lý Doanh nghiệp (CRUD) =====
+  legalRecordTypes: [
+    { code: "GPDKKD", name: "Giấy chứng nhận đăng ký kinh doanh / đăng ký doanh nghiệp" },
+    { code: "DIEU_LE", name: "Điều lệ công ty" },
+    { code: "BIEN_BAN_HOP_HDTV", name: "Biên bản họp Hội đồng thành viên" },
+    { code: "QUYET_DINH", name: "Quyết định (HĐTV / Giám đốc)" },
+    { code: "GPMT", name: "Giấy phép môi trường" },
+    { code: "GCN_MST", name: "Giấy chứng nhận đăng ký thuế" },
+    { code: "MAU_DAU", name: "Thông báo / Giấy chứng nhận mẫu dấu" },
+    { code: "GIAY_PHEP_KHAC", name: "Giấy phép con khác (PCCC, ATTP, ngành nghề có điều kiện...)" },
+    { code: "KHAC", name: "Khác" }
+  ],
+
+  escapeHtml: function(str) {
+    return String(str === null || str === undefined ? "" : str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  },
+
+  // Dùng riêng khi chèn giá trị vào bên trong onclick="...('...')" (thoát " cho thuộc tính HTML, thoát ' cho chuỗi JS)
+  escapeAttr: function(str) {
+    return String(str === null || str === undefined ? "" : str)
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "\\'");
+  },
+
+  getLegalRecordTypeName: function(code) {
+    var found = this.legalRecordTypes.find(function(t) { return t.code === code; });
+    return found ? found.name : code;
+  },
+
+  populateLegalRecordTypeSelects: function() {
+    var filterSelect = document.getElementById("legal-filter-type");
+    var formSelect = document.getElementById("legal-form-type");
+
+    if (filterSelect && filterSelect.options.length <= 1) {
+      DMS.legalRecordTypes.forEach(function(t) {
+        filterSelect.innerHTML += '<option value="' + t.code + '">' + DMS.escapeHtml(t.name) + '</option>';
+      });
+    }
+
+    if (formSelect) {
+      var curVal = formSelect.value;
+      formSelect.innerHTML = '<option value="">-- Chọn loại hồ sơ --</option>';
+      DMS.legalRecordTypes.forEach(function(t) {
+        var sel = (t.code === curVal) ? "selected" : "";
+        formSelect.innerHTML += '<option value="' + t.code + '" ' + sel + '>' + DMS.escapeHtml(t.name) + '</option>';
+      });
+    }
+  },
+
+  getLegalExpiryBadge: function(r) {
+    if (r.expiry_status === "EXPIRED") return '<span class="badge badge-danger">Đã hết hạn (' + Math.abs(r.days_remaining) + ' ngày)</span>';
+    if (r.expiry_status === "DUE_SOON") return '<span class="badge badge-warning">Sắp hết hạn (còn ' + r.days_remaining + ' ngày)</span>';
+    if (r.expiry_status === "VALID") return '<span class="badge badge-success">Còn hiệu lực</span>';
+    return '<span class="badge badge-secondary">Không thời hạn</span>';
+  },
+
+  loadLegalRecords: function(page) {
+    DMS.populateLegalRecordTypeSelects();
+
+    var tbody = document.getElementById("legal-records-tbody");
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 24px;"><div class="spinner-inline" style="margin: 0 auto 8px auto;"></div>Đang tải hồ sơ pháp lý...</td></tr>';
+
+    var token = AUTH.getToken();
+    var params = {
+      page: page || 1,
+      pageSize: 10,
+      type: document.getElementById("legal-filter-type") ? document.getElementById("legal-filter-type").value : "ALL",
+      status: document.getElementById("legal-filter-status") ? document.getElementById("legal-filter-status").value : "ALL",
+      search: document.getElementById("legal-filter-search") ? document.getElementById("legal-filter-search").value.trim() : ""
+    };
+
+    var btnAdd = document.getElementById("btn-add-legal-record");
+    if (btnAdd) btnAdd.style.display = APP.hasPermission("legal_records.manage") ? "inline-flex" : "none";
+
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (!res || !res.success) {
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: red; padding: 20px;">' + DMS.escapeHtml(res && res.message ? res.message : "Lỗi nạp hồ sơ pháp lý") + '</td></tr>';
+          return;
+        }
+
+        var data = res.data || {};
+        var list = data.items || [];
+        DMS._lastLegalRecordsList = list;
+
+        if (list.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">Chưa có hồ sơ pháp lý nào được lưu trữ.</td></tr>';
+        } else {
+          var canManage = APP.hasPermission("legal_records.manage");
+          var html = "";
+          list.forEach(function(r) {
+            var fileCell = r.file_id
+              ? '<a href="https://drive.google.com/file/d/' + encodeURIComponent(r.file_id) + '/view" target="_blank" rel="noopener">📎 ' + DMS.escapeHtml(r.file_name || "Xem tệp") + '</a>'
+              : '<span style="color: var(--text-muted);">Chưa có tệp</span>';
+
+            var actions = '<div style="display: flex; gap: 6px; flex-wrap: wrap;">';
+            if (canManage) {
+              actions += '<button class="btn btn-secondary btn-sm" onclick="DMS.openLegalRecordModal(\'' + r.id + '\')">Sửa</button>';
+              actions += '<button class="btn btn-danger btn-sm" onclick="DMS.deleteLegalRecord(\'' + r.id + '\', \'' + DMS.escapeAttr(r.title) + '\')">Xóa</button>';
+            } else {
+              actions += '<span style="color: var(--text-muted); font-size: 12px;">Chỉ xem</span>';
+            }
+            actions += '</div>';
+
+            html += '<tr>' +
+              '<td><span class="badge badge-primary">' + DMS.escapeHtml(DMS.getLegalRecordTypeName(r.type)) + '</span></td>' +
+              '<td><strong>' + DMS.escapeHtml(r.title) + '</strong>' + (r.notes ? ('<br><small style="color:var(--text-muted);">' + DMS.escapeHtml(r.notes) + '</small>') : '') + '</td>' +
+              '<td>' + DMS.escapeHtml(r.number || "-") + '</td>' +
+              '<td>' + DMS.escapeHtml(r.issuing_authority || "-") + '</td>' +
+              '<td>' + (r.issue_date_display || "-") + '</td>' +
+              '<td>' + (r.expiry_date_display || "Không thời hạn") + '<br>' + DMS.getLegalExpiryBadge(r) + '</td>' +
+              '<td>' + fileCell + '</td>' +
+              '<td>' + actions + '</td>' +
+              '</tr>';
+          });
+          tbody.innerHTML = html;
+        }
+
+        APP.renderPagination("legal-records-pagination", data.pagination, "DMS.loadLegalRecords");
+      })
+      .withFailureHandler(function(err) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: red; padding: 20px;">Lỗi kết nối: ' + DMS.escapeHtml(err.message || err) + '</td></tr>';
+      })
+      .apiGetLegalRecordsList(params, token);
+  },
+
+  openLegalRecordModal: function(recordId) {
+    var form = document.getElementById("form-legal-record-edit");
+    if (form) form.reset();
+
+    DMS.populateLegalRecordTypeSelects();
+
+    var titleEl = document.getElementById("legal-record-modal-title");
+    document.getElementById("legal-form-id").value = recordId || "";
+    document.getElementById("legal-form-file-id").value = "";
+    document.getElementById("legal-form-file-name").value = "";
+    var fileInfo = document.getElementById("legal-form-file-info");
+    if (fileInfo) fileInfo.textContent = "Tệp tin sẽ được tự động đồng bộ và lưu trữ trên Google Drive.";
+
+    var target = null;
+    if (recordId && DMS._lastLegalRecordsList) {
+      target = DMS._lastLegalRecordsList.find(function(r) { return r.id === recordId; });
+    }
+
+    if (recordId && target) {
+      if (titleEl) titleEl.textContent = "✏️ Cập Nhật Hồ Sơ Pháp Lý";
+      document.getElementById("legal-form-type").value = target.type || "";
+      document.getElementById("legal-form-title").value = target.title || "";
+      document.getElementById("legal-form-number").value = target.number || "";
+      document.getElementById("legal-form-authority").value = target.issuing_authority || "";
+      document.getElementById("legal-form-issue-date").value = target.issue_date || "";
+      document.getElementById("legal-form-expiry-date").value = target.expiry_date || "";
+      document.getElementById("legal-form-status").value = target.status || "ACTIVE";
+      document.getElementById("legal-form-notes").value = target.notes || "";
+      document.getElementById("legal-form-file-id").value = target.file_id || "";
+      document.getElementById("legal-form-file-name").value = target.file_name || "";
+      if (target.file_id && fileInfo) {
+        fileInfo.textContent = "Đã có tệp: " + (target.file_name || "tệp đính kèm") + " (chọn tệp mới nếu muốn thay thế).";
+      }
+    } else {
+      if (titleEl) titleEl.textContent = "➕ Thêm Hồ Sơ Pháp Lý Mới";
+      document.getElementById("legal-form-status").value = "ACTIVE";
+    }
+
+    DMS.openModal("modal-legal-record-form");
+  },
+
+  submitLegalRecordForm: function() {
+    var id = document.getElementById("legal-form-id").value;
+    var type = document.getElementById("legal-form-type").value;
+    var title = document.getElementById("legal-form-title").value.trim();
+    var number = document.getElementById("legal-form-number").value.trim();
+    var authority = document.getElementById("legal-form-authority").value.trim();
+    var issueDate = document.getElementById("legal-form-issue-date").value;
+    var expiryDate = document.getElementById("legal-form-expiry-date").value;
+    var status = document.getElementById("legal-form-status").value;
+    var notes = document.getElementById("legal-form-notes").value.trim();
+
+    if (!type) {
+      APP.toast("Vui lòng chọn loại hồ sơ pháp lý.", "error");
+      return;
+    }
+    if (!title) {
+      APP.toast("Vui lòng nhập tên / trích yếu hồ sơ.", "error");
+      return;
+    }
+
+    var token = AUTH.getToken();
+    var fileInput = document.getElementById("legal-form-file");
+
+    function saveRecord(fileId, fileName) {
+      var recordData = {
+        id: id || "",
+        type: type,
+        title: title,
+        number: number,
+        issuing_authority: authority,
+        issue_date: issueDate,
+        expiry_date: expiryDate,
+        status: status,
+        notes: notes,
+        file_id: fileId || "",
+        file_name: fileName || ""
+      };
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          APP.setButtonLoading("btn-save-legal-record", false);
+          if (res && res.success) {
+            DMS.closeModal("modal-legal-record-form");
+            APP.toast(id ? "Cập nhật hồ sơ pháp lý thành công!" : "Thêm hồ sơ pháp lý thành công!", "success");
+            DMS.loadLegalRecords(1);
+          } else {
+            APP.toast((res && res.message) || "Không thể lưu hồ sơ pháp lý.", "error");
+          }
+        })
+        .withFailureHandler(function(err) {
+          APP.setButtonLoading("btn-save-legal-record", false);
+          APP.toast("Lỗi hệ thống: " + (err.message || err), "error");
+        })
+        .apiSaveLegalRecord(recordData, token);
+    }
+
+    if (fileInput && fileInput.files.length > 0) {
+      APP.setButtonLoading("btn-save-legal-record", true, "Đang tải tệp lên Drive...");
+      var file = fileInput.files[0];
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var base64 = e.target.result;
+        google.script.run
+          .withSuccessHandler(function(uploadRes) {
+            if (uploadRes && uploadRes.success) {
+              APP.setButtonLoading("btn-save-legal-record", true, "Đang lưu hồ sơ pháp lý...");
+              saveRecord(uploadRes.file_id, uploadRes.file_name);
+            } else {
+              APP.setButtonLoading("btn-save-legal-record", false);
+              APP.toast((uploadRes && uploadRes.message) || "Lỗi tải tệp lên Drive.", "error");
+            }
+          })
+          .withFailureHandler(function(err) {
+            APP.setButtonLoading("btn-save-legal-record", false);
+            APP.toast("Lỗi tải tệp: " + (err.message || err), "error");
+          })
+          .apiUploadDocumentFile({
+            base64Data: base64,
+            fileName: file.name,
+            mimeType: file.type,
+            docType: "LEGAL",
+            year: new Date().getFullYear()
+          }, token);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      APP.setButtonLoading("btn-save-legal-record", true, "Đang lưu hồ sơ pháp lý...");
+      var existingFileId = document.getElementById("legal-form-file-id").value;
+      var existingFileName = document.getElementById("legal-form-file-name").value;
+      saveRecord(existingFileId, existingFileName);
+    }
+  },
+
+  deleteLegalRecord: function(recordId, recordTitle) {
+    if (!confirm("Bạn có chắc chắn muốn xóa hồ sơ pháp lý [" + recordTitle + "]?\nThao tác này không thể hoàn tác (tệp trên Drive sẽ không bị xóa).")) {
+      return;
+    }
+
+    var token = AUTH.getToken();
+    APP.toast("Đang xóa hồ sơ pháp lý...", "info");
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (res.success) {
+          APP.toast("Đã xóa hồ sơ pháp lý thành công!", "success");
+          DMS.loadLegalRecords(1);
+        } else {
+          APP.toast(res.message, "error");
+        }
+      })
+      .withFailureHandler(function(err) {
+        APP.toast(err.message || "Lỗi xóa hồ sơ pháp lý.", "error");
+      })
+      .apiDeleteLegalRecord(recordId, token);
   },
 
   // Helper Badges

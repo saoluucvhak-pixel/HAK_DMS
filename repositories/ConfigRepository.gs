@@ -23,7 +23,9 @@ var ConfigRepository = {
       return s.key === key;
     });
     if (row) {
-      DB.updateRowById(CONFIG.SHEETS.APP_SETTINGS.NAME, row.id || row.key, {
+      DB.updateRowByMatch(CONFIG.SHEETS.APP_SETTINGS.NAME, function(s) {
+        return s.key === key;
+      }, {
         value: value,
         updated_at: nowStr,
         updated_by_id: actorId || "SYSTEM"

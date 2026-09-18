@@ -305,7 +305,7 @@ var UserRepository = {
   },
 
   // 5 vai trò hệ thống không được phép xóa
-  SYSTEM_ROLES: ["ROLE_ADMIN", "ROLE_DIRECTOR", "ROLE_DEPT_HEAD", "ROLE_SPECIALIST", "ROLE_CLERK"],
+  SYSTEM_ROLES: ["ROLE_ADMIN", "ROLE_DIRECTOR", "ROLE_DEPT_HEAD", "ROLE_CLERK", "ROLE_STAFF"],
 
   /**
    * Lấy danh sách vai trò kèm thống kê số lượng nhân sự và phân loại hệ thống

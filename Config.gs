@@ -94,6 +94,13 @@ var CONFIG = {
     SESSIONS: {
       NAME: "SESSIONS",
       HEADERS: ["id", "user_id", "token_hash", "expires_at", "created_at", "ip_address", "user_agent", "is_revoked"]
+    },
+    LEGAL_RECORDS: {
+      NAME: "LEGAL_RECORDS",
+      HEADERS: [
+        "id", "type", "title", "number", "issuing_authority", "issue_date", "expiry_date",
+        "file_id", "file_name", "status", "notes", "created_by_id", "created_at", "updated_at"
+      ]
     }
   },
 
@@ -149,6 +156,19 @@ var CONFIG = {
     { id: "DT_BC", code: "BAO_CAO", name: "Báo cáo", prefix: "BC", description: "Báo cáo sơ kết, định kỳ", status: "ACTIVE" }
   ],
 
+  // Danh mục Loại Hồ sơ pháp lý doanh nghiệp mặc định
+  DEFAULT_LEGAL_RECORD_TYPES: [
+    { code: "GPDKKD", name: "Giấy chứng nhận đăng ký kinh doanh / đăng ký doanh nghiệp" },
+    { code: "DIEU_LE", name: "Điều lệ công ty" },
+    { code: "BIEN_BAN_HOP_HDTV", name: "Biên bản họp Hội đồng thành viên" },
+    { code: "QUYET_DINH", name: "Quyết định (HĐTV / Giám đốc)" },
+    { code: "GPMT", name: "Giấy phép môi trường" },
+    { code: "GCN_MST", name: "Giấy chứng nhận đăng ký thuế" },
+    { code: "MAU_DAU", name: "Thông báo / Giấy chứng nhận mẫu dấu" },
+    { code: "GIAY_PHEP_KHAC", name: "Giấy phép con khác (PCCC, ATTP, ngành nghề có điều kiện...)" },
+    { code: "KHAC", name: "Khác" }
+  ],
+
   // TẦNG 1: QUYỀN MENU HIỂN THỊ (menu.xxx)
   DEFAULT_MENU_PERMISSIONS: [
     { code: "menu.dashboard", name: "Bảng điều khiển & Hàng đợi", module_group: "Bảng điều khiển", description: "Hiển thị màn hình Work Queue & Thống kê" },
@@ -157,6 +177,7 @@ var CONFIG = {
     { code: "menu.outgoing_docs", name: "Văn bản Đi", module_group: "Quản lý văn bản", description: "Hiển thị danh sách và quy trình Văn bản đi" },
     { code: "menu.departments", name: "Quản lý Phòng ban", module_group: "Tổ chức cơ quan", description: "Hiển thị danh mục cơ cấu phòng ban" },
     { code: "menu.document_types", name: "Danh mục Loại văn bản", module_group: "Sổ văn bản", description: "Hiển thị danh mục loại văn bản & sổ theo dõi" },
+    { code: "menu.legal_records", name: "Hồ sơ Pháp lý Doanh nghiệp", module_group: "Hồ sơ pháp lý", description: "Hiển thị kho lưu trữ ĐKKD, Điều lệ, Biên bản họp HĐTV, Quyết định, Giấy phép môi trường..." },
     { code: "menu.users", name: "Quản lý Người dùng", module_group: "Quản trị hệ thống", description: "Hiển thị danh sách tài khoản & phân quyền" },
     { code: "menu.roles", name: "Vai trò & Phân quyền", module_group: "Quản trị hệ thống", description: "Hiển thị quản lý vai trò và ma trận quyền" },
     { code: "menu.settings", name: "Cấu hình Hệ thống", module_group: "Quản trị hệ thống", description: "Cấu hình số nhảy, thông tin đơn vị, lưu trữ Drive" },
@@ -190,6 +211,7 @@ var CONFIG = {
     { code: "departments.manage", name: "Quản lý Phòng ban", module_group: "Cơ cấu cơ quan", description: "Thêm, sửa thông tin phòng ban" },
     { code: "doctypes.manage", name: "Quản lý Loại văn bản & Sổ", module_group: "Sổ văn bản", description: "Thêm, sửa loại văn bản và tiền tố số" },
     { code: "numbering.manage", name: "Cấu hình Số nhảy tự động", module_group: "Sổ văn bản", description: "Thiết lập lại số bắt đầu, cập nhật số hiện tại" },
+    { code: "legal_records.manage", name: "Quản lý Hồ sơ Pháp lý", module_group: "Hồ sơ pháp lý", description: "Thêm, sửa, xóa và tải lên tệp hồ sơ pháp lý doanh nghiệp" },
 
     // Quản trị hệ thống Core
     { code: "users.create", name: "Tạo tài khoản người dùng", module_group: "Quản trị hệ thống", description: "Thêm mới tài khoản nhân viên" },
@@ -206,7 +228,7 @@ var CONFIG = {
   DEFAULT_ROLE_PERMISSIONS: {
     Admin: ["*"],
     Director: [
-      "menu.dashboard", "menu.my_tasks", "menu.incoming_docs", "menu.outgoing_docs", "menu.departments", "menu.document_types", "menu.audit",
+      "menu.dashboard", "menu.my_tasks", "menu.incoming_docs", "menu.outgoing_docs", "menu.departments", "menu.document_types", "menu.legal_records", "menu.audit",
       "docs.incoming.assign", "docs.incoming.complete", "docs.incoming.archive",
       "docs.outgoing.approve", "docs.outgoing.request_revision",
       "assignments.create", "assignments.update"
@@ -218,10 +240,10 @@ var CONFIG = {
       "assignments.create", "assignments.update"
     ],
     Clerk: [
-      "menu.dashboard", "menu.incoming_docs", "menu.outgoing_docs", "menu.document_types",
+      "menu.dashboard", "menu.incoming_docs", "menu.outgoing_docs", "menu.document_types", "menu.legal_records",
       "docs.incoming.receive", "docs.incoming.submit", "docs.incoming.archive",
       "docs.outgoing.issue_number", "docs.outgoing.publish",
-      "doctypes.manage", "numbering.manage"
+      "doctypes.manage", "numbering.manage", "legal_records.manage"
     ],
     Staff: [
       "menu.dashboard", "menu.my_tasks", "menu.incoming_docs", "menu.outgoing_docs",
@@ -240,6 +262,7 @@ var CONFIG = {
     { key: "COMPANY_PHONE", value: "028 1234 5678", description: "Số điện thoại văn phòng" },
     { key: "DRIVE_ROOT_FOLDER_NAME", value: "MINI_DMS_STORAGE", description: "Tên thư mục gốc lưu trữ tệp trên Google Drive" },
     { key: "DEADLINE_ALERT_DAYS", value: "2", description: "Số ngày trước hạn để hệ thống kích hoạt cảnh báo vàng" },
+    { key: "LEGAL_EXPIRY_ALERT_DAYS", value: "30", description: "Số ngày trước hạn để cảnh báo giấy phép / hồ sơ pháp lý sắp hết hiệu lực" },
     { key: "AUTO_SEND_EMAIL_REMINDER", value: "true", description: "Tự động gửi email cảnh báo hạn xử lý lúc 08:00 sáng" },
     { key: "CHAT_WEBHOOK_URL", value: "", description: "Webhook Google Chat nhận thông báo văn bản khẩn" },
     { key: "DEFAULT_NUMBERING_PREFIX", value: "CV-DMS", description: "Ký hiệu tiền tố mặc định khi cấp số công văn" },
