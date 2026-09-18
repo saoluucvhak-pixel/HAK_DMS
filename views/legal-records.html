@@ -1,0 +1,46 @@
+<!-- View: Legal Records (Hồ sơ Pháp lý Doanh nghiệp) -->
+<div id="view-legal-records" class="view-section">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">📜 HỒ SƠ PHÁP LÝ DOANH NGHIỆP</div>
+      <button class="btn btn-primary btn-sm" id="btn-add-legal-record" onclick="DMS.openLegalRecordModal()" style="display:none;">➕ Thêm hồ sơ pháp lý</button>
+    </div>
+    <div class="card-body" style="padding-bottom: 0;">
+      <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px; background: #f8fafc; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+        ℹ️ Nơi lưu trữ tập trung các hồ sơ pháp lý gốc của doanh nghiệp: Giấy chứng nhận đăng ký kinh doanh, Điều lệ công ty, Biên bản họp Hội đồng thành viên, Quyết định, Giấy phép môi trường và các giấy phép con khác. Hệ thống tự động cảnh báo khi hồ sơ sắp/đã hết hiệu lực.
+      </div>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px;">
+        <select id="legal-filter-type" class="form-control" style="max-width: 280px;" onchange="DMS.loadLegalRecords(1)">
+          <option value="ALL">Tất cả loại hồ sơ</option>
+        </select>
+        <select id="legal-filter-status" class="form-control" style="max-width: 200px;" onchange="DMS.loadLegalRecords(1)">
+          <option value="ALL">Tất cả trạng thái</option>
+          <option value="ACTIVE">Đang lưu hành</option>
+          <option value="ARCHIVED">Đã lưu trữ</option>
+        </select>
+        <input type="text" id="legal-filter-search" class="form-control" style="max-width: 280px;" placeholder="Tìm theo tên, số hiệu, cơ quan cấp..." onkeyup="if(event.key==='Enter') DMS.loadLegalRecords(1);">
+        <button class="btn btn-secondary btn-sm" onclick="DMS.loadLegalRecords(1)">🔍 Tìm kiếm</button>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table-custom">
+        <thead>
+          <tr>
+            <th>Loại hồ sơ</th>
+            <th>Tên / Trích yếu</th>
+            <th>Số hiệu</th>
+            <th>Cơ quan cấp</th>
+            <th>Ngày cấp</th>
+            <th>Hiệu lực đến</th>
+            <th>Tệp đính kèm</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="legal-records-tbody">
+          <tr><td colspan="8" style="text-align: center; padding: 28px;"><div class="spinner-inline" style="margin: 0 auto 8px auto;"></div>Đang tải hồ sơ pháp lý...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination-wrapper" id="legal-records-pagination"></div>
+  </div>
+</div>

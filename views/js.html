@@ -131,6 +131,7 @@ var APP = {
       outgoing_docs: "📤 Quản Lý Sổ Văn Bản Đi & Dự Thảo",
       departments: "🏢 Danh Mục Cơ Cấu Phòng Ban",
       document_types: "📚 Danh Mục Loại Sổ & Loại Văn Bản",
+      legal_records: "📜 Hồ Sơ Pháp Lý Doanh Nghiệp",
       users: "👥 Quản Trị Tài Khoản & Phân Quyền",
       settings: "⚙️ Cấu Hình Hệ Thống & Sổ Cấp Số",
       audit: "🛡️ Nhật Ký Kiểm Toán Hệ Thống",
@@ -144,6 +145,7 @@ var APP = {
     else if (viewName === "outgoing_docs") { DMS.populateCategorySelects(); DMS.populateDepartmentSelects(); DMS.loadOutgoingDocs(1, params); }
     else if (viewName === "departments") DMS.loadDepartments();
     else if (viewName === "document_types") DMS.loadDocumentTypes();
+    else if (viewName === "legal_records") DMS.loadLegalRecords(1);
     else if (viewName === "users") { DMS.populateDepartmentSelects(); DMS.loadUsers(1); }
     else if (viewName === "settings") DMS.loadSettings();
     else if (viewName === "audit") DMS.loadAuditLogs(1);
@@ -2714,6 +2716,295 @@ var DMS = {
         APP.toast("Lỗi hệ thống: " + (err.message || err), "error");
       })
       .apiDeleteDocumentType(typeId, token);
+  },
+
+  // ===== Quản lý Hồ sơ Pháp lý Doanh nghiệp (CRUD) =====
+  legalRecordTypes: [
+    { code: "GPDKKD", name: "Giấy chứng nhận đăng ký kinh doanh / đăng ký doanh nghiệp" },
+    { code: "DIEU_LE", name: "Điều lệ công ty" },
+    { code: "BIEN_BAN_HOP_HDTV", name: "Biên bản họp Hội đồng thành viên" },
+    { code: "QUYET_DINH", name: "Quyết định (HĐTV / Giám đốc)" },
+    { code: "GPMT", name: "Giấy phép môi trường" },
+    { code: "GCN_MST", name: "Giấy chứng nhận đăng ký thuế" },
+    { code: "MAU_DAU", name: "Thông báo / Giấy chứng nhận mẫu dấu" },
+    { code: "GIAY_PHEP_KHAC", name: "Giấy phép con khác (PCCC, ATTP, ngành nghề có điều kiện...)" },
+    { code: "KHAC", name: "Khác" }
+  ],
+
+  escapeHtml: function(str) {
+    return String(str === null || str === undefined ? "" : str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  },
+
+  // Dùng riêng khi chèn giá trị vào bên trong onclick="...('...')" (thoát " cho thuộc tính HTML, thoát ' cho chuỗi JS)
+  escapeAttr: function(str) {
+    return String(str === null || str === undefined ? "" : str)
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "\\'");
+  },
+
+  getLegalRecordTypeName: function(code) {
+    var found = this.legalRecordTypes.find(function(t) { return t.code === code; });
+    return found ? found.name : code;
+  },
+
+  populateLegalRecordTypeSelects: function() {
+    var filterSelect = document.getElementById("legal-filter-type");
+    var formSelect = document.getElementById("legal-form-type");
+
+    if (filterSelect && filterSelect.options.length <= 1) {
+      DMS.legalRecordTypes.forEach(function(t) {
+        filterSelect.innerHTML += '<option value="' + t.code + '">' + DMS.escapeHtml(t.name) + '</option>';
+      });
+    }
+
+    if (formSelect) {
+      var curVal = formSelect.value;
+      formSelect.innerHTML = '<option value="">-- Chọn loại hồ sơ --</option>';
+      DMS.legalRecordTypes.forEach(function(t) {
+        var sel = (t.code === curVal) ? "selected" : "";
+        formSelect.innerHTML += '<option value="' + t.code + '" ' + sel + '>' + DMS.escapeHtml(t.name) + '</option>';
+      });
+    }
+  },
+
+  getLegalExpiryBadge: function(r) {
+    if (r.expiry_status === "EXPIRED") return '<span class="badge badge-danger">Đã hết hạn (' + Math.abs(r.days_remaining) + ' ngày)</span>';
+    if (r.expiry_status === "DUE_SOON") return '<span class="badge badge-warning">Sắp hết hạn (còn ' + r.days_remaining + ' ngày)</span>';
+    if (r.expiry_status === "VALID") return '<span class="badge badge-success">Còn hiệu lực</span>';
+    return '<span class="badge badge-secondary">Không thời hạn</span>';
+  },
+
+  loadLegalRecords: function(page) {
+    DMS.populateLegalRecordTypeSelects();
+
+    var tbody = document.getElementById("legal-records-tbody");
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 24px;"><div class="spinner-inline" style="margin: 0 auto 8px auto;"></div>Đang tải hồ sơ pháp lý...</td></tr>';
+
+    var token = AUTH.getToken();
+    var params = {
+      page: page || 1,
+      pageSize: 10,
+      type: document.getElementById("legal-filter-type") ? document.getElementById("legal-filter-type").value : "ALL",
+      status: document.getElementById("legal-filter-status") ? document.getElementById("legal-filter-status").value : "ALL",
+      search: document.getElementById("legal-filter-search") ? document.getElementById("legal-filter-search").value.trim() : ""
+    };
+
+    var btnAdd = document.getElementById("btn-add-legal-record");
+    if (btnAdd) btnAdd.style.display = APP.hasPermission("legal_records.manage") ? "inline-flex" : "none";
+
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (!res || !res.success) {
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: red; padding: 20px;">' + DMS.escapeHtml(res && res.message ? res.message : "Lỗi nạp hồ sơ pháp lý") + '</td></tr>';
+          return;
+        }
+
+        var data = res.data || {};
+        var list = data.items || [];
+        DMS._lastLegalRecordsList = list;
+
+        if (list.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">Chưa có hồ sơ pháp lý nào được lưu trữ.</td></tr>';
+        } else {
+          var canManage = APP.hasPermission("legal_records.manage");
+          var html = "";
+          list.forEach(function(r) {
+            var fileCell = r.file_id
+              ? '<a href="https://drive.google.com/file/d/' + encodeURIComponent(r.file_id) + '/view" target="_blank" rel="noopener">📎 ' + DMS.escapeHtml(r.file_name || "Xem tệp") + '</a>'
+              : '<span style="color: var(--text-muted);">Chưa có tệp</span>';
+
+            var actions = '<div style="display: flex; gap: 6px; flex-wrap: wrap;">';
+            if (canManage) {
+              actions += '<button class="btn btn-secondary btn-sm" onclick="DMS.openLegalRecordModal(\'' + r.id + '\')">Sửa</button>';
+              actions += '<button class="btn btn-danger btn-sm" onclick="DMS.deleteLegalRecord(\'' + r.id + '\', \'' + DMS.escapeAttr(r.title) + '\')">Xóa</button>';
+            } else {
+              actions += '<span style="color: var(--text-muted); font-size: 12px;">Chỉ xem</span>';
+            }
+            actions += '</div>';
+
+            html += '<tr>' +
+              '<td><span class="badge badge-primary">' + DMS.escapeHtml(DMS.getLegalRecordTypeName(r.type)) + '</span></td>' +
+              '<td><strong>' + DMS.escapeHtml(r.title) + '</strong>' + (r.notes ? ('<br><small style="color:var(--text-muted);">' + DMS.escapeHtml(r.notes) + '</small>') : '') + '</td>' +
+              '<td>' + DMS.escapeHtml(r.number || "-") + '</td>' +
+              '<td>' + DMS.escapeHtml(r.issuing_authority || "-") + '</td>' +
+              '<td>' + (r.issue_date_display || "-") + '</td>' +
+              '<td>' + (r.expiry_date_display || "Không thời hạn") + '<br>' + DMS.getLegalExpiryBadge(r) + '</td>' +
+              '<td>' + fileCell + '</td>' +
+              '<td>' + actions + '</td>' +
+              '</tr>';
+          });
+          tbody.innerHTML = html;
+        }
+
+        APP.renderPagination("legal-records-pagination", data.pagination, "DMS.loadLegalRecords");
+      })
+      .withFailureHandler(function(err) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: red; padding: 20px;">Lỗi kết nối: ' + DMS.escapeHtml(err.message || err) + '</td></tr>';
+      })
+      .apiGetLegalRecordsList(params, token);
+  },
+
+  openLegalRecordModal: function(recordId) {
+    var form = document.getElementById("form-legal-record-edit");
+    if (form) form.reset();
+
+    DMS.populateLegalRecordTypeSelects();
+
+    var titleEl = document.getElementById("legal-record-modal-title");
+    document.getElementById("legal-form-id").value = recordId || "";
+    document.getElementById("legal-form-file-id").value = "";
+    document.getElementById("legal-form-file-name").value = "";
+    var fileInfo = document.getElementById("legal-form-file-info");
+    if (fileInfo) fileInfo.textContent = "Tệp tin sẽ được tự động đồng bộ và lưu trữ trên Google Drive.";
+
+    var target = null;
+    if (recordId && DMS._lastLegalRecordsList) {
+      target = DMS._lastLegalRecordsList.find(function(r) { return r.id === recordId; });
+    }
+
+    if (recordId && target) {
+      if (titleEl) titleEl.textContent = "✏️ Cập Nhật Hồ Sơ Pháp Lý";
+      document.getElementById("legal-form-type").value = target.type || "";
+      document.getElementById("legal-form-title").value = target.title || "";
+      document.getElementById("legal-form-number").value = target.number || "";
+      document.getElementById("legal-form-authority").value = target.issuing_authority || "";
+      document.getElementById("legal-form-issue-date").value = target.issue_date || "";
+      document.getElementById("legal-form-expiry-date").value = target.expiry_date || "";
+      document.getElementById("legal-form-status").value = target.status || "ACTIVE";
+      document.getElementById("legal-form-notes").value = target.notes || "";
+      document.getElementById("legal-form-file-id").value = target.file_id || "";
+      document.getElementById("legal-form-file-name").value = target.file_name || "";
+      if (target.file_id && fileInfo) {
+        fileInfo.textContent = "Đã có tệp: " + (target.file_name || "tệp đính kèm") + " (chọn tệp mới nếu muốn thay thế).";
+      }
+    } else {
+      if (titleEl) titleEl.textContent = "➕ Thêm Hồ Sơ Pháp Lý Mới";
+      document.getElementById("legal-form-status").value = "ACTIVE";
+    }
+
+    DMS.openModal("modal-legal-record-form");
+  },
+
+  submitLegalRecordForm: function() {
+    var id = document.getElementById("legal-form-id").value;
+    var type = document.getElementById("legal-form-type").value;
+    var title = document.getElementById("legal-form-title").value.trim();
+    var number = document.getElementById("legal-form-number").value.trim();
+    var authority = document.getElementById("legal-form-authority").value.trim();
+    var issueDate = document.getElementById("legal-form-issue-date").value;
+    var expiryDate = document.getElementById("legal-form-expiry-date").value;
+    var status = document.getElementById("legal-form-status").value;
+    var notes = document.getElementById("legal-form-notes").value.trim();
+
+    if (!type) {
+      APP.toast("Vui lòng chọn loại hồ sơ pháp lý.", "error");
+      return;
+    }
+    if (!title) {
+      APP.toast("Vui lòng nhập tên / trích yếu hồ sơ.", "error");
+      return;
+    }
+
+    var token = AUTH.getToken();
+    var fileInput = document.getElementById("legal-form-file");
+
+    function saveRecord(fileId, fileName) {
+      var recordData = {
+        id: id || "",
+        type: type,
+        title: title,
+        number: number,
+        issuing_authority: authority,
+        issue_date: issueDate,
+        expiry_date: expiryDate,
+        status: status,
+        notes: notes,
+        file_id: fileId || "",
+        file_name: fileName || ""
+      };
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          APP.setButtonLoading("btn-save-legal-record", false);
+          if (res && res.success) {
+            DMS.closeModal("modal-legal-record-form");
+            APP.toast(id ? "Cập nhật hồ sơ pháp lý thành công!" : "Thêm hồ sơ pháp lý thành công!", "success");
+            DMS.loadLegalRecords(1);
+          } else {
+            APP.toast((res && res.message) || "Không thể lưu hồ sơ pháp lý.", "error");
+          }
+        })
+        .withFailureHandler(function(err) {
+          APP.setButtonLoading("btn-save-legal-record", false);
+          APP.toast("Lỗi hệ thống: " + (err.message || err), "error");
+        })
+        .apiSaveLegalRecord(recordData, token);
+    }
+
+    if (fileInput && fileInput.files.length > 0) {
+      APP.setButtonLoading("btn-save-legal-record", true, "Đang tải tệp lên Drive...");
+      var file = fileInput.files[0];
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var base64 = e.target.result;
+        google.script.run
+          .withSuccessHandler(function(uploadRes) {
+            if (uploadRes && uploadRes.success) {
+              APP.setButtonLoading("btn-save-legal-record", true, "Đang lưu hồ sơ pháp lý...");
+              saveRecord(uploadRes.file_id, uploadRes.file_name);
+            } else {
+              APP.setButtonLoading("btn-save-legal-record", false);
+              APP.toast((uploadRes && uploadRes.message) || "Lỗi tải tệp lên Drive.", "error");
+            }
+          })
+          .withFailureHandler(function(err) {
+            APP.setButtonLoading("btn-save-legal-record", false);
+            APP.toast("Lỗi tải tệp: " + (err.message || err), "error");
+          })
+          .apiUploadDocumentFile({
+            base64Data: base64,
+            fileName: file.name,
+            mimeType: file.type,
+            docType: "LEGAL",
+            year: new Date().getFullYear()
+          }, token);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      APP.setButtonLoading("btn-save-legal-record", true, "Đang lưu hồ sơ pháp lý...");
+      var existingFileId = document.getElementById("legal-form-file-id").value;
+      var existingFileName = document.getElementById("legal-form-file-name").value;
+      saveRecord(existingFileId, existingFileName);
+    }
+  },
+
+  deleteLegalRecord: function(recordId, recordTitle) {
+    if (!confirm("Bạn có chắc chắn muốn xóa hồ sơ pháp lý [" + recordTitle + "]?\nThao tác này không thể hoàn tác (tệp trên Drive sẽ không bị xóa).")) {
+      return;
+    }
+
+    var token = AUTH.getToken();
+    APP.toast("Đang xóa hồ sơ pháp lý...", "info");
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (res.success) {
+          APP.toast("Đã xóa hồ sơ pháp lý thành công!", "success");
+          DMS.loadLegalRecords(1);
+        } else {
+          APP.toast(res.message, "error");
+        }
+      })
+      .withFailureHandler(function(err) {
+        APP.toast(err.message || "Lỗi xóa hồ sơ pháp lý.", "error");
+      })
+      .apiDeleteLegalRecord(recordId, token);
   },
 
   // Helper Badges

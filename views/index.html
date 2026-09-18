@@ -69,6 +69,9 @@
         <a class="nav-item" data-view="document_types" data-menu-perm="menu.document_types" onclick="APP.switchView('document_types')">
           <span class="nav-icon">📚</span> Danh mục Loại sổ (VB)
         </a>
+        <a class="nav-item" data-view="legal_records" data-menu-perm="menu.legal_records" onclick="APP.switchView('legal_records')">
+          <span class="nav-icon">📜</span> Hồ sơ Pháp lý Doanh nghiệp
+        </a>
 
         <div class="nav-group-title">QUẢN TRỊ HỆ THỐNG</div>
         <a class="nav-item" data-view="users" data-menu-perm="menu.users" onclick="APP.switchView('users')">
@@ -121,6 +124,7 @@
         <?!= include('views/document-detail'); ?>
         <?!= include('views/departments'); ?>
         <?!= include('views/document-types'); ?>
+        <?!= include('views/legal-records'); ?>
         <?!= include('views/users'); ?>
         <?!= include('views/settings'); ?>
         <?!= include('views/audit'); ?>
