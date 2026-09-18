@@ -316,11 +316,21 @@ var DB = {
    * Cập nhật 1 dòng theo ID
    */
   updateRowById: function(sheetName, id, updateObj) {
+    return this.updateRowByMatch(sheetName, function(row) {
+      return row.id == id;
+    }, updateObj);
+  },
+
+  /**
+   * Cập nhật 1 dòng theo điều kiện tùy ý (dùng cho các bảng không có cột 'id',
+   * ví dụ APP_SETTINGS khóa theo 'key', DOCUMENT_NUMBERING khóa theo 'year' + 'document_type')
+   */
+  updateRowByMatch: function(sheetName, matchFn, updateObj) {
     var sheet = this.getSheet(sheetName);
     var rows = this.getAllRows(sheetName);
     var target = null;
     for (var i = 0; i < rows.length; i++) {
-      if (rows[i].id == id) {
+      if (matchFn(rows[i])) {
         target = rows[i];
         break;
       }

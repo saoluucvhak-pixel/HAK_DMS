@@ -31,6 +31,13 @@ function apiGetDocumentDetail(docId, token) {
   try {
     var user = AuthService.validateToken(token);
     if (!user) return { success: false, message: "Phiên làm việc hết hạn hoặc không hợp lệ." };
+
+    var doc = DocumentRepository.findById(docId);
+    if (!doc) return { success: false, message: "Không tìm thấy văn bản." };
+
+    var requiredPerm = (doc.document_type === "OUTGOING") ? "menu.outgoing_docs" : "menu.incoming_docs";
+    PermissionService.checkPermission(user.id, requiredPerm);
+
     var detail = DocumentService.getDocumentDetail(docId, user);
     return { success: true, data: detail };
   } catch (e) {

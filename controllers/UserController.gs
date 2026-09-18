@@ -96,22 +96,25 @@ function apiSaveUser(userData, token) {
       var checkDup = UserRepository.findByUsername(userData.username);
       if (checkDup) throw new Error("Tên đăng nhập '" + userData.username + "' đã tồn tại.");
 
-      var allUsers = DB.getAllRows(CONFIG.SHEETS.USERS.NAME);
-      var nextId = "USR" + IdUtils.padZero(allUsers.length + 1, 3);
+      var newUser = SheetUtils.withLock(function() {
+        var allUsers = DB.getAllRows(CONFIG.SHEETS.USERS.NAME);
+        var nextId = "USR" + IdUtils.padZero(allUsers.length + 1, 3);
 
-      var newUser = {
-        id: nextId,
-        username: userData.username.toLowerCase().trim(),
-        password_hash: SheetUtils.sha256(userData.password || "123456"),
-        full_name: userData.full_name,
-        phone: userData.phone || "",
-        email: userData.email || "",
-        department_id: userData.department_id || "",
-        status: "ACTIVE",
-        created_by_id: actor.id
-      };
+        var userObj = {
+          id: nextId,
+          username: userData.username.toLowerCase().trim(),
+          password_hash: SheetUtils.sha256(userData.password || "123456"),
+          full_name: userData.full_name,
+          phone: userData.phone || "",
+          email: userData.email || "",
+          department_id: userData.department_id || "",
+          status: "ACTIVE",
+          created_by_id: actor.id
+        };
 
-      UserRepository.insert(newUser);
+        UserRepository.insert(userObj);
+        return userObj;
+      }, 10000);
 
       if (userData.role_id) {
         UserRepository.assignUserRole(newUser.id, userData.role_id, actor.id);
@@ -264,6 +267,14 @@ function apiGetRolesList(token) {
   try {
     var user = AuthService.validateToken(token);
     if (!user) return { success: false, message: "Phiên làm việc hết hạn." };
+
+    // Cho phép nếu có quyền menu.users (chọn vai trò khi tạo/sửa tài khoản) hoặc menu.roles
+    var hasMenuAccess = PermissionService.hasPermission(user.id, "menu.users") ||
+                        PermissionService.hasPermission(user.id, "menu.roles");
+    if (!hasMenuAccess) {
+      throw new Error("403: Bạn không có quyền truy cập danh sách vai trò.");
+    }
+
     var roles = UserRepository.getRolesWithStats();
     return { success: true, data: roles };
   } catch (e) {
@@ -378,6 +389,7 @@ function apiGetSettings(token) {
   try {
     var user = AuthService.validateToken(token);
     if (!user) return { success: false, message: "Phiên làm việc hết hạn." };
+    PermissionService.checkPermission(user.id, "menu.settings");
     var settings = ConfigRepository.getAllSettings();
     var docTypes = ConfigRepository.getAllDocumentTypes();
     var numbering = NumberingService.getNumberingList();

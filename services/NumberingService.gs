@@ -41,8 +41,12 @@ var NumberingService = {
         currentNumber = parseInt(targetRow.current_number, 10) || 0;
         nextNumber = currentNumber + 1;
         var prefix = targetRow.prefix || fullPrefix;
+        var matchedYear = targetRow.year;
+        var matchedDocType = targetRow.document_type;
 
-        DB.updateRowById(CONFIG.SHEETS.DOCUMENT_NUMBERING.NAME, targetRow.id || (targetRow.year + "_" + targetRow.document_type), {
+        DB.updateRowByMatch(CONFIG.SHEETS.DOCUMENT_NUMBERING.NAME, function(row) {
+          return row.year == matchedYear && row.document_type === matchedDocType;
+        }, {
           current_number: nextNumber,
           updated_at: DateUtils.formatDateTime(new Date())
         });
@@ -204,7 +208,12 @@ var NumberingService = {
       var targetDocTypeCode = docTypeRow ? docTypeRow.code : documentType;
 
       if (found) {
-        DB.updateRowById(CONFIG.SHEETS.DOCUMENT_NUMBERING.NAME, found.id || (found.year + "_" + found.document_type), {
+        var matchedFoundYear = found.year;
+        var matchedFoundDocType = found.document_type;
+
+        DB.updateRowByMatch(CONFIG.SHEETS.DOCUMENT_NUMBERING.NAME, function(row) {
+          return row.year == matchedFoundYear && row.document_type === matchedFoundDocType;
+        }, {
           prefix: prefix,
           current_number: parseInt(currentNumber, 10),
           updated_at: nowStr
