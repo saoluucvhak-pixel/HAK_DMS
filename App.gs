@@ -43,9 +43,14 @@ function include(filename) {
 
 /**
  * API kích hoạt khởi tạo cưỡng bức từ giao diện quản trị
+ * (Chỉ bổ sung danh mục/quyền còn thiếu, không xóa hoặc ghi đè dữ liệu đã có)
  */
-function apiInitSystem(force) {
+function apiInitSystem(force, token) {
   try {
+    var actor = AuthService.validateToken(token);
+    if (!actor) return { success: false, message: "Phiên làm việc hết hạn hoặc không hợp lệ." };
+    PermissionService.checkPermission(actor.id, "settings.update");
+
     var res = INIT.autoInitSystem(force === true);
     return res;
   } catch (e) {

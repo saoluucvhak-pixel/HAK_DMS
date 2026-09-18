@@ -41,7 +41,32 @@ var NotificationService = {
       }
     }
 
+    var legalAlertDays = parseInt(ConfigRepository.getSetting("LEGAL_EXPIRY_ALERT_DAYS", "30"), 10) || 30;
+    var expiringLegalRecords = LegalRecordRepository.getExpiringSoon(legalAlertDays);
+
     var sentCount = 0;
+
+    // Gửi email cảnh báo hồ sơ pháp lý sắp/đã hết hiệu lực tới hộp thư văn thư
+    if (isEmailEnabled && expiringLegalRecords.length > 0) {
+      var companyEmail = ConfigRepository.getSetting("COMPANY_EMAIL", "");
+      if (companyEmail) {
+        try {
+          var legalSubject = "[Nhắc việc Mini DMS] " + expiringLegalRecords.length + " hồ sơ pháp lý sắp/đã hết hiệu lực";
+          var legalBody = "Kính gửi Văn thư,\n\nHệ thống phát hiện các hồ sơ pháp lý doanh nghiệp sau cần được rà soát, gia hạn:\n\n";
+          expiringLegalRecords.forEach(function(r) {
+            var rem = DateUtils.getDaysRemaining(r.expiry_date);
+            legalBody += "- [" + r.type + "] " + r.title + (r.number ? " (Số: " + r.number + ")" : "") +
+              " - Hết hạn: " + r.expiry_date + " (" + (rem < 0 ? "ĐÃ QUÁ HẠN " + Math.abs(rem) + " NGÀY" : "Còn " + rem + " ngày") + ")\n";
+          });
+          legalBody += "\nVui lòng truy cập hệ thống mục Hồ sơ Pháp lý để kiểm tra và gia hạn kịp thời.\nTrân trọng!";
+
+          MailApp.sendEmail(companyEmail, legalSubject, legalBody);
+          sentCount++;
+        } catch (e) {
+          Logger.log("Lỗi gửi email cảnh báo hồ sơ pháp lý: " + e.toString());
+        }
+      }
+    }
 
     // Gửi email nhắc việc
     if (isEmailEnabled) {
@@ -71,12 +96,16 @@ var NotificationService = {
     }
 
     // Gửi Webhook nếu có cấu hình
-    if (chatWebhook && alertList.length > 0) {
+    if (chatWebhook && (alertList.length > 0 || expiringLegalRecords.length > 0)) {
       try {
         var chatMsg = "🚨 *[MINI DMS - CẢNH BÁO TIẾN ĐỘ VĂN BẢN]*\n" +
           "Hôm nay có " + alertList.length + " nhiệm vụ sắp đến hạn hoặc đã quá hạn xử lý.\n" +
           "- Quá hạn: " + alertList.filter(function(x) { return x.daysRemaining < 0; }).length + " việc\n" +
           "- Sắp đến hạn: " + alertList.filter(function(x) { return x.daysRemaining >= 0; }).length + " việc.";
+
+        if (expiringLegalRecords.length > 0) {
+          chatMsg += "\n📜 Có " + expiringLegalRecords.length + " hồ sơ pháp lý (ĐKKD, Điều lệ, Giấy phép môi trường...) sắp/đã hết hiệu lực, cần rà soát gia hạn.";
+        }
 
         UrlFetchApp.fetch(chatWebhook, {
           method: "post",
@@ -92,11 +121,12 @@ var NotificationService = {
     AuditService.log({
       action: "DEADLINE_SCAN_TRIGGER",
       entity_type: "SYSTEM",
-      message_snapshot: "Quét deadline định kỳ: Phát hiện " + alertList.length + " công việc, đã gửi " + sentCount + " email thông báo."
+      message_snapshot: "Quét deadline định kỳ: Phát hiện " + alertList.length + " công việc và " + expiringLegalRecords.length + " hồ sơ pháp lý sắp/đã hết hiệu lực, đã gửi " + sentCount + " email thông báo."
     });
 
     return {
       totalAlerts: alertList.length,
+      expiringLegalRecords: expiringLegalRecords.length,
       emailsSent: sentCount
     };
   }

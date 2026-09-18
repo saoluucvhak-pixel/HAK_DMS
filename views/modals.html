@@ -470,4 +470,73 @@
   </div>
 </div>
 
+<!-- 10. Modal Hồ sơ Pháp lý Doanh nghiệp -->
+<div id="modal-legal-record-form" class="modal-backdrop">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <div class="modal-title" id="legal-record-modal-title">Thông tin Hồ sơ Pháp lý</div>
+      <button class="modal-close" onclick="DMS.closeModal('modal-legal-record-form')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-legal-record-edit">
+        <input type="hidden" id="legal-form-id">
+        <input type="hidden" id="legal-form-file-id">
+        <input type="hidden" id="legal-form-file-name">
+        <div class="form-group">
+          <label class="form-label">Loại hồ sơ pháp lý <span style="color:red">*</span></label>
+          <select id="legal-form-type" class="form-control" required>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tên / Trích yếu hồ sơ <span style="color:red">*</span></label>
+          <input type="text" id="legal-form-title" class="form-control" placeholder="Ví dụ: Giấy chứng nhận đăng ký doanh nghiệp lần đầu..." required>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Số hiệu văn bản / giấy phép</label>
+            <input type="text" id="legal-form-number" class="form-control" placeholder="Ví dụ: 0401234567...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cơ quan cấp / ban hành</label>
+            <input type="text" id="legal-form-authority" class="form-control" placeholder="Ví dụ: Sở KH&ĐT TP...">
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Ngày cấp / ngày ký</label>
+            <input type="date" id="legal-form-issue-date" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hiệu lực đến ngày</label>
+            <input type="date" id="legal-form-expiry-date" class="form-control">
+            <small style="color: var(--text-muted); font-size: 11px;">Để trống nếu hồ sơ không có thời hạn hiệu lực (VD: Điều lệ, Biên bản họp).</small>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tệp tin đính kèm (Scan / PDF)</label>
+          <input type="file" id="legal-form-file" class="form-control" accept=".pdf,.doc,.docx,.png,.jpg">
+          <small id="legal-form-file-info" style="color: var(--text-muted); display: block; margin-top: 4px;">
+            Tệp tin sẽ được tự động đồng bộ và lưu trữ trên Google Drive.
+          </small>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Trạng thái lưu trữ</label>
+          <select id="legal-form-status" class="form-control">
+            <option value="ACTIVE">Đang lưu hành</option>
+            <option value="ARCHIVED">Đã lưu trữ</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ghi chú</label>
+          <textarea id="legal-form-notes" class="form-control" rows="2" placeholder="Ghi chú thêm về hồ sơ..."></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="DMS.closeModal('modal-legal-record-form')">Hủy bỏ</button>
+      <button class="btn btn-primary" id="btn-save-legal-record" onclick="DMS.submitLegalRecordForm()">💾 Lưu hồ sơ pháp lý</button>
+    </div>
+  </div>
+</div>
+
 

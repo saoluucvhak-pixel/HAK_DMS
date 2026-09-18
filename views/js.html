@@ -1673,6 +1673,30 @@ var DMS = {
       .apiSaveSettings(payload, token);
   },
 
+  forceReinitSystem: function() {
+    if (!confirm("Đồng bộ lại danh mục quyền hệ thống?\nThao tác này chỉ bổ sung quyền/danh mục còn thiếu (ví dụ menu mới), không xóa hoặc ghi đè dữ liệu đã có.")) {
+      return;
+    }
+
+    var token = AUTH.getToken();
+    APP.setButtonLoading("btn-force-reinit", true, "Đang đồng bộ...");
+
+    google.script.run
+      .withSuccessHandler(function(res) {
+        APP.setButtonLoading("btn-force-reinit", false);
+        if (res && res.success) {
+          APP.toast((res.message || "Đồng bộ thành công!") + " Vui lòng tải lại trang (F5) để thấy menu mới.", "success");
+        } else {
+          APP.toast((res && res.message) || "Không thể đồng bộ hệ thống.", "error");
+        }
+      })
+      .withFailureHandler(function(err) {
+        APP.setButtonLoading("btn-force-reinit", false);
+        APP.toast("Lỗi hệ thống: " + (err.message || err), "error");
+      })
+      .apiInitSystem(true, token);
+  },
+
   // Audit Logs
   debounceLoadAudit: function() {
     clearTimeout(this._timerAudit);
