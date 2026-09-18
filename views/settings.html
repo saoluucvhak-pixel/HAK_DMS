@@ -62,5 +62,19 @@
         </div>
       </div>
     </div>
+
+    <!-- Cột 3: Đồng bộ danh mục quyền hệ thống -->
+    <div class="card" style="grid-column: 1 / -1;">
+      <div class="card-header">
+        <div class="card-title">🔄 ĐỒNG BỘ DANH MỤC QUYỀN HỆ THỐNG</div>
+        <button class="btn btn-secondary btn-sm" id="btn-force-reinit" onclick="DMS.forceReinitSystem()">🔄 Đồng bộ lại quyền & danh mục</button>
+      </div>
+      <div class="card-body">
+        <div style="font-size: 13px; color: var(--text-muted);">
+          Dùng nút này mỗi khi hệ thống được nâng cấp thêm tính năng/menu mới (ví dụ: Hồ sơ Pháp lý) nhưng bạn không thấy menu mới xuất hiện dù đã tải lại trang.
+          Thao tác này chỉ <strong>bổ sung</strong> các quyền/danh mục còn thiếu (gán quyền menu mới cho vai trò Admin và các vai trò mặc định), <strong>không xóa hoặc ghi đè</strong> dữ liệu, tài khoản, phân quyền tùy chỉnh đã có. Sau khi chạy xong, hãy tải lại trang (F5) để thấy menu mới.
+        </div>
+      </div>
+    </div>
   </div>
 </div>
