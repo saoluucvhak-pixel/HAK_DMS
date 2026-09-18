@@ -1,0 +1,65 @@
+<!-- View: Outgoing Docs (Văn bản Đi) -->
+<div id="view-outgoing-docs" class="view-section">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">📤 SỔ VĂN BẢN ĐI & DỰ THẢO</div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-primary btn-sm" id="btn-open-draft-modal" onclick="DMS.openDraftModal()">
+          ✍️ Soạn thảo dự thảo mới
+        </button>
+      </div>
+    </div>
+    <div class="card-body" style="padding-bottom: 0;">
+      <!-- Bộ lọc -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) 100px; gap: 12px; margin-bottom: 16px;">
+        <input type="text" id="outgoing-filter-search" class="form-control" placeholder="Tìm số phát hành, trích yếu..." oninput="DMS.debounceLoadOutgoing()">
+        
+        <select id="outgoing-filter-status" class="form-control" onchange="DMS.loadOutgoingDocs(1)">
+          <option value="ALL">Tất cả trạng thái</option>
+          <option value="DRAFT">Bản thảo (DRAFT)</option>
+          <option value="REVIEWING">Đang thẩm tra (Trưởng phòng)</option>
+          <option value="REVISION_REQUIRED">Yêu cầu chỉnh sửa</option>
+          <option value="WAITING_APPROVAL">Chờ lãnh đạo ký duyệt</option>
+          <option value="APPROVED">Đã duyệt (Chờ cấp số)</option>
+          <option value="NUMBERED">Đã cấp số</option>
+          <option value="ISSUED">Đã ban hành</option>
+        </select>
+
+        <select id="outgoing-filter-category" class="form-control" onchange="DMS.loadOutgoingDocs(1)">
+          <option value="ALL">Tất cả loại văn bản</option>
+        </select>
+
+        <select id="outgoing-filter-dept" class="form-control" onchange="DMS.loadOutgoingDocs(1)">
+          <option value="ALL">Tất cả phòng ban</option>
+        </select>
+
+        <button class="btn btn-secondary" onclick="DMS.resetOutgoingFilters()">Đặt lại</button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table-custom">
+        <thead>
+          <tr>
+            <th>Mã dự thảo</th>
+            <th>Số phát hành chính thức</th>
+            <th>Trích yếu nội dung</th>
+            <th>Loại văn bản</th>
+            <th>Đơn vị soạn thảo</th>
+            <th>Ngày tạo</th>
+            <th>Trạng thái quy trình</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="outgoing-docs-tbody">
+          <tr>
+            <td colspan="8" style="text-align:center; padding: 24px;">Đang tải danh sách văn bản đi...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Phân trang chuẩn -->
+    <div class="pagination-wrapper" id="outgoing-pagination"></div>
+  </div>
+</div>

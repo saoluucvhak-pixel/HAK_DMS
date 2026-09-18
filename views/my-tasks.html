@@ -1,0 +1,62 @@
+<!-- View: My Tasks (Hồ sơ nhiệm vụ của tôi) -->
+<div id="view-my-tasks" class="view-section">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">📌 HỒ SƠ NHIỆM VỤ ĐƯỢC GIAO CỦA TÔI</div>
+      <button class="btn btn-secondary btn-sm" onclick="DMS.loadMyTasks(1)">🔄 Làm mới</button>
+    </div>
+    <div class="card-body" style="padding-bottom: 0;">
+      <!-- Bộ lọc -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) 100px; gap: 12px; margin-bottom: 16px;">
+        <input type="text" id="my-tasks-filter-search" class="form-control" placeholder="Tìm số hiệu, trích yếu, ghi chú..." oninput="DMS.debounceLoadMyTasks()">
+        
+        <select id="my-tasks-filter-status" class="form-control" onchange="DMS.loadMyTasks(1)">
+          <option value="ALL">Tất cả trạng thái</option>
+          <option value="PENDING">Chờ xử lý (PENDING)</option>
+          <option value="IN_PROGRESS">Đang thực hiện (IN_PROGRESS)</option>
+          <option value="COMPLETED">Đã hoàn thành (COMPLETED)</option>
+        </select>
+
+        <select id="my-tasks-filter-role" class="form-control" onchange="DMS.loadMyTasks(1)">
+          <option value="ALL">Tất cả vai trò</option>
+          <option value="PRIMARY">Chủ trì chính</option>
+          <option value="SUPPORT">Phối hợp thực hiện</option>
+        </select>
+
+        <select id="my-tasks-filter-deadline" class="form-control" onchange="DMS.loadMyTasks(1)">
+          <option value="ALL">Tất cả hạn chót</option>
+          <option value="due_soon">⏳ Sắp đến hạn (&le; 2 ngày)</option>
+          <option value="overdue">🚨 Đã quá hạn</option>
+        </select>
+
+        <button class="btn btn-secondary" onclick="DMS.resetMyTasksFilters()">Đặt lại</button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table-custom">
+        <thead>
+          <tr>
+            <th>Mã nhiệm vụ</th>
+            <th>Văn bản liên quan</th>
+            <th>Vai trò</th>
+            <th>Hạn chót & Thời hạn</th>
+            <th>Độ khẩn</th>
+            <th>Trạng thái</th>
+            <th>Ghi chú tiến độ</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="my-tasks-tbody">
+          <tr>
+            <td colspan="8" style="text-align:center; padding: 24px;">Đang tải danh sách nhiệm vụ của bạn...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Phân trang chuẩn -->
+    <div class="card-footer" style="display: flex; justify-content: space-between; align-items: center;" id="my-tasks-pagination">
+    </div>
+  </div>
+</div>

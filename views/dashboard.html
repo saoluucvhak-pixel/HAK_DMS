@@ -1,0 +1,146 @@
+<!-- View: Dashboard (Bảng điều khiển & Hàng đợi công việc Work Queue) -->
+<div id="view-dashboard" class="view-section active">
+  <!-- 1. Executive Welcome Banner (EduClass Pattern) -->
+  <div id="dashboardWelcomeBanner" class="dashboard-banner">
+    <div class="dashboard-banner-content">
+      <div class="dashboard-banner-left">
+        <div class="dashboard-greeting-badge" id="dashboardGreetingDate">
+          <span>📅</span>
+          <span id="dashboardCurrentDateStr">Đang nạp thời gian...</span>
+        </div>
+        <h1 class="dashboard-banner-title" id="dashboardGreetingTitle">
+          Xin chào, <span id="dashboardGreetingUserName">...</span> 👋
+        </h1>
+        <p class="dashboard-banner-subtitle">
+          Chào mừng trở lại với Hệ thống Quản lý Văn bản & Điều hành <strong id="dashboardCompanyName">MINI DMS</strong>.
+          <span id="dashboardWorkspaceIndicator" class="workspace-inline-tag">
+            🏢 <span id="dashboardActiveDeptText">Cơ quan / Đơn vị</span>
+          </span>
+        </p>
+      </div>
+
+      <div class="dashboard-banner-actions">
+        <button type="button" id="btnRefreshDashboard" class="btn-dash-action" onclick="DMS.loadDashboard(true)" title="Làm mới số liệu tức thì">
+          <span id="iconRefreshDash" style="display: inline-block;">🔄</span>
+          <span id="textRefreshDash">Làm mới</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Action Shortcuts Bar -->
+    <div class="dashboard-shortcuts-bar">
+      <div class="shortcut-label">Lối tắt thao tác nhanh:</div>
+      <div class="shortcut-buttons">
+        <button type="button" class="shortcut-btn primary" onclick="DMS.openReceiveModal()" title="Văn thư tiếp nhận và vào sổ văn bản đến mới">
+          <span>📥</span>
+          <span>+ Tiếp nhận VB đến</span>
+        </button>
+        <button type="button" class="shortcut-btn" onclick="DMS.openDraftModal()" title="Soạn thảo dự thảo văn bản đi mới">
+          <span>✍️</span>
+          <span>+ Soạn dự thảo</span>
+        </button>
+        <button type="button" class="shortcut-btn info" onclick="APP.switchView('incoming_docs')" title="Tra cứu sổ văn bản đến">
+          <span>📂</span>
+          <span>Sổ VB đến</span>
+        </button>
+        <button type="button" class="shortcut-btn success" onclick="APP.switchView('outgoing_docs')" title="Tra cứu sổ văn bản đi">
+          <span>📤</span>
+          <span>Sổ VB đi</span>
+        </button>
+        <button type="button" class="shortcut-btn warning" onclick="DMS.triggerScanDeadlines()" title="Quét tự động các văn bản sắp đến hạn và quá hạn">
+          <span>🔔</span>
+          <span>Quét Deadline</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Thẻ KPI Hàng đợi Work Queue -->
+  <div class="kpi-grid">
+    <div class="kpi-card kpi-pending" onclick="APP.switchView('my_tasks', {status: 'PENDING'})">
+      <div class="kpi-icon">⏳</div>
+      <div class="kpi-info">
+        <div class="kpi-info-val" id="kpi-pending">0</div>
+        <div class="kpi-info-label">Việc cần xử lý</div>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-duesoon" onclick="APP.switchView('my_tasks', {filter: 'due_soon'})">
+      <div class="kpi-icon">⚠️</div>
+      <div class="kpi-info">
+        <div class="kpi-info-val" id="kpi-duesoon">0</div>
+        <div class="kpi-info-label">Sắp đến hạn (≤ 2 ngày)</div>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-overdue" onclick="APP.switchView('my_tasks', {filter: 'overdue'})">
+      <div class="kpi-icon">🚨</div>
+      <div class="kpi-info">
+        <div class="kpi-info-val" id="kpi-overdue">0</div>
+        <div class="kpi-info-label">Nhiệm vụ quá hạn</div>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-approval" onclick="APP.switchView('incoming_docs', {status: 'SUBMITTED'})">
+      <div class="kpi-icon">✍️</div>
+      <div class="kpi-info">
+        <div class="kpi-info-val" id="kpi-approval">0</div>
+        <div class="kpi-info-label">Chờ chỉ đạo / Phê duyệt</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Bảng Hàng đợi: Việc của tôi -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">📌 VIỆC CỦA TÔI (HÀNG ĐỢI XỬ LÝ ƯU TIÊN)</div>
+      <button class="btn btn-secondary btn-sm" onclick="DMS.loadDashboard(true)">🔄 Làm mới</button>
+    </div>
+    <div class="table-responsive">
+      <table class="table-custom">
+        <thead>
+          <tr>
+            <th>Số hiệu / Mã VB</th>
+            <th>Trích yếu nội dung</th>
+            <th>Vai trò</th>
+            <th>Thời hạn (Deadline)</th>
+            <th>Độ khẩn</th>
+            <th>Tiến độ</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="dashboard-my-tasks-tbody">
+          <tr>
+            <td colspan="7" style="text-align:center; padding: 24px; color: var(--text-muted);">Đang tải dữ liệu...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 4. Bảng Hàng đợi: Chờ chỉ đạo & Ký duyệt -->
+  <div class="card" id="card-pending-approvals" style="display: none;">
+    <div class="card-header">
+      <div class="card-title">📋 VĂN BẢN CHỜ CHỈ ĐẠO & PHÊ DUYỆT</div>
+    </div>
+    <div class="table-responsive">
+      <table class="table-custom">
+        <thead>
+          <tr>
+            <th>Mã / Số VB</th>
+            <th>Loại VB</th>
+            <th>Trích yếu</th>
+            <th>Trạng thái</th>
+            <th>Người tạo / Cơ quan</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="dashboard-approvals-tbody">
+          <tr>
+            <td colspan="6" style="text-align:center; padding: 24px; color: var(--text-muted);">Đang tải dữ liệu...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

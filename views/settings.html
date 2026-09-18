@@ -1,0 +1,66 @@
+<!-- View: Settings (Cấu hình Hệ thống & Sổ cấp số) -->
+<div id="view-settings" class="view-section">
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+    <!-- Cột 1: Cấu hình chung -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">⚙️ CẤU HÌNH THÔNG TIN CHUNG</div>
+        <button class="btn btn-primary btn-sm" id="btn-save-settings" onclick="DMS.saveGeneralSettings()">💾 Lưu thiết lập</button>
+      </div>
+      <div class="card-body">
+        <form id="form-general-settings">
+          <div class="form-group">
+            <label class="form-label">Tên cơ quan / Đơn vị chủ quản</label>
+            <input type="text" id="setting-COMPANY_NAME" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mã viết tắt cơ quan (dùng trong ký hiệu số VB)</label>
+            <input type="text" id="setting-COMPANY_CODE" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Thư mục gốc lưu trữ trên Google Drive</label>
+            <input type="text" id="setting-DRIVE_ROOT_FOLDER_NAME" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cảnh báo trước hạn xử lý (số ngày)</label>
+            <input type="number" id="setting-DEADLINE_ALERT_DAYS" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Webhook Google Chat nhận cảnh báo khẩn</label>
+            <input type="text" id="setting-CHAT_WEBHOOK_URL" class="form-control" placeholder="https://chat.googleapis.com/v1/spaces/...">
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Cột 2: Sổ cấp số tự động văn bản đi -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🔢 SỔ CẤP SỐ NHẢY TỰ ĐỘNG (DOCUMENT NUMBERING)</div>
+      </div>
+      <div class="card-body">
+        <div style="margin-bottom: 12px; font-size: 13px; color: var(--text-muted);">
+          Bộ đếm số phát hành hoạt động theo cơ chế nguyên tử (LockService) chống trùng số khi nhiều người xin số cùng lúc.
+        </div>
+        <div class="table-responsive">
+          <table class="table-custom">
+            <thead>
+              <tr>
+                <th>Năm</th>
+                <th>Loại sổ / Văn bản</th>
+                <th>Mã code</th>
+                <th>Tiền tố số</th>
+                <th>Số hiện tại</th>
+                <th>Số kế tiếp</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="numbering-tbody">
+              <tr><td colspan="7" style="text-align: center; padding: 20px;">Đang tải dữ liệu số nhảy...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,114 @@
+<!-- View: Users (Quản lý Người dùng & Ma trận Phân quyền) -->
+<div id="view-users" class="view-section">
+  <!-- Tab navigation: 3 Tab chuyên biệt -->
+  <div style="display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;">
+    <button class="btn btn-primary" id="btn-tab-users-list" onclick="DMS.switchUserTab('list')">👥 Danh sách Tài khoản</button>
+    <button class="btn btn-secondary" id="btn-tab-roles-list" onclick="DMS.switchUserTab('roles')">🏷️ Danh mục Vai trò</button>
+    <button class="btn btn-secondary" id="btn-tab-roles-matrix" onclick="DMS.switchUserTab('matrix')">🛡️ Ma trận Phân quyền 2 Tầng</button>
+  </div>
+
+  <!-- Tab 1: Danh sách tài khoản -->
+  <div id="user-tab-content-list" class="card">
+    <div class="card-header">
+      <div class="card-title">👥 DANH SÁCH TÀI KHOẢN NHÂN SỰ</div>
+      <button class="btn btn-primary btn-sm" onclick="DMS.openUserModal()">➕ Thêm tài khoản mới</button>
+    </div>
+    <div class="card-body" style="padding-bottom: 0;">
+      <div style="display: grid; grid-template-columns: 1fr 200px 150px; gap: 12px; margin-bottom: 16px;">
+        <input type="text" id="users-filter-search" class="form-control" placeholder="Tìm tên đăng nhập, họ tên, SĐT..." oninput="DMS.debounceLoadUsers()">
+        <select id="users-filter-dept" class="form-control" onchange="DMS.loadUsers(1)">
+          <option value="ALL">Tất cả phòng ban</option>
+        </select>
+        <select id="users-filter-status" class="form-control" onchange="DMS.loadUsers(1)">
+          <option value="ALL">Tất cả trạng thái</option>
+          <option value="ACTIVE">Đang hoạt động</option>
+          <option value="LOCKED">Đã khóa</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table-custom">
+        <thead>
+          <tr>
+            <th>Mã NV</th>
+            <th>Tên đăng nhập</th>
+            <th>Họ và tên</th>
+            <th>Phòng ban</th>
+            <th>Vai trò</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="users-tbody">
+          <tr><td colspan="7" style="text-align: center; padding: 20px;">Đang tải danh sách người dùng...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination-wrapper" id="users-pagination"></div>
+  </div>
+
+  <!-- Tab 2: Danh mục vai trò -->
+  <div id="user-tab-content-roles-list" class="card" style="display: none;">
+    <div class="card-header">
+      <div class="card-title">🏷️ DANH MỤC VAI TRÒ HỆ THỐNG</div>
+      <button class="btn btn-primary btn-sm" onclick="DMS.openRoleModal()">➕ Thêm vai trò mới</button>
+    </div>
+    <div class="table-responsive">
+      <table class="table-custom">
+        <thead>
+          <tr>
+            <th>Mã vai trò</th>
+            <th>Tên vai trò</th>
+            <th>Mô tả chức năng</th>
+            <th>Số nhân sự</th>
+            <th>Loại vai trò</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="roles-tbody">
+          <tr><td colspan="6" style="text-align: center; padding: 20px;">Đang tải danh mục vai trò...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tab 3: Ma trận phân quyền 2 tầng -->
+  <div id="user-tab-content-matrix" class="card" style="display: none;">
+    <div class="card-header">
+      <div class="card-title">🛡️ MA TRẬN PHÂN QUYỀN 2 TẦNG (2-TIER RBAC)</div>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-secondary btn-sm" onclick="DMS.toggleAllMatrixPermissions(true)">Check tất cả</button>
+        <button class="btn btn-secondary btn-sm" onclick="DMS.toggleAllMatrixPermissions(false)">Bỏ chọn tất cả</button>
+        <button class="btn btn-success btn-sm" id="btn-save-role-perms" onclick="DMS.saveRolePermissions()">💾 Lưu cấu hình quyền</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; background: #f8fafc; padding: 14px 18px; border-radius: var(--radius-md); border: 1px solid var(--border);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <label style="font-weight: 700; color: var(--text-main);">Vai trò đang cấu hình:</label>
+          <select id="select-role-for-matrix" class="form-control" style="min-width: 260px; font-weight: 600;" onchange="DMS.renderRolePermissionsMatrix()">
+            <!-- Role options -->
+          </select>
+        </div>
+        <div style="display: flex; gap: 12px; font-size: 12px; align-items: center;">
+          <span style="display: inline-flex; align-items: center; gap: 5px;">
+            <span class="badge badge-primary" style="font-size: 10px; padding: 2px 6px;">TẦNG 1</span> Quyền Menu thanh Sidebar
+          </span>
+          <span style="display: inline-flex; align-items: center; gap: 5px;">
+            <span class="badge" style="background: #f3e8ff; color: #7e22ce; font-size: 10px; padding: 2px 6px;">TẦNG 2</span> Quyền Thao tác & Quy trình
+          </span>
+        </div>
+      </div>
+
+      <!-- Thông báo khi chọn vai trò Admin -->
+      <div id="admin-perm-notice" style="display: none; background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 13px;">
+        ℹ️ <strong>Vai trò Quản trị viên (Admin)</strong> mặc định sở hữu toàn quyền thao tác và xem toàn bộ menu hệ thống (*), không cần gán thủ công.
+      </div>
+
+      <!-- Khung chứa danh sách nhóm quyền -->
+      <div id="matrix-container">
+        <!-- Permissions grouped by module -->
+      </div>
+    </div>
+  </div>
+</div>

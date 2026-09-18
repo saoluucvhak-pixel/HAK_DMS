@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Mini DMS - Quản Lý Văn Bản Nội Bộ</title>
+  <?!= include('views/css'); ?>
+</head>
+<body>
+  <!-- Thanh tải tiến trình toàn cục (Slim Top Progress Bar) -->
+  <div id="global-progress-bar" class="global-progress-bar"></div>
+
+  <!-- Màn hình Đăng nhập (Hiện khi chưa có token) -->
+  <div id="login-overlay" style="position: fixed; inset: 0; background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); z-index: 9999; display: flex; align-items: center; justify-content: center; transition: opacity 0.35s ease;">
+    <div style="background: #ffffff; padding: 40px; border-radius: var(--radius-lg); width: 100%; max-width: 420px; box-shadow: var(--shadow-lg);">
+      <div style="text-align: center; margin-bottom: 28px;">
+        <div style="width: 54px; height: 54px; background: linear-gradient(135deg, #4f46e5, #6366f1); border-radius: 12px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 26px;">
+          📂
+        </div>
+        <h1 style="font-size: 20px; font-weight: 800; color: #0f172a;">MINI DMS WORKSPACE</h1>
+        <p style="font-size: 13px; color: #64748b; margin-top: 4px;">Hệ thống Quản lý Văn bản & Quy trình Nội bộ</p>
+      </div>
+
+      <form id="form-login" onsubmit="event.preventDefault(); DMS.handleLogin();">
+        <div class="form-group">
+          <label class="form-label">Tên đăng nhập</label>
+          <input type="text" id="login-username" class="form-control" placeholder="Nhập username (mặc định: admin)" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mật khẩu</label>
+          <input type="password" id="login-password" class="form-control" placeholder="Nhập mật khẩu (mặc định: admin123)" required>
+        </div>
+        <button type="submit" id="btn-login-submit" class="btn btn-primary" style="width: 100%; padding: 11px; margin-top: 8px;">
+          Đăng nhập hệ thống
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Cấu trúc Ứng dụng sau khi Đăng nhập -->
+  <div id="app-root">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">📂</div>
+        <div>MINI DMS</div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-group-title">BẢNG ĐIỀU KHIỂN</div>
+        <a class="nav-item active" data-view="dashboard" data-menu-perm="menu.dashboard" onclick="APP.switchView('dashboard')">
+          <span class="nav-icon">📊</span> Tổng quan & Work Queue
+        </a>
+        <a class="nav-item" data-view="my_tasks" data-menu-perm="menu.my_tasks" onclick="APP.switchView('my_tasks')">
+          <span class="nav-icon">📌</span> Việc của tôi
+        </a>
+
+        <div class="nav-group-title">QUẢN LÝ VĂN BẢN</div>
+        <a class="nav-item" data-view="incoming_docs" data-menu-perm="menu.incoming_docs" onclick="APP.switchView('incoming_docs')">
+          <span class="nav-icon">📥</span> Sổ Văn bản Đến
+        </a>
+        <a class="nav-item" data-view="outgoing_docs" data-menu-perm="menu.outgoing_docs" onclick="APP.switchView('outgoing_docs')">
+          <span class="nav-icon">📤</span> Sổ Văn bản Đi
+        </a>
+
+        <div class="nav-group-title">DANH MỤC & CƠ CẤU</div>
+        <a class="nav-item" data-view="departments" data-menu-perm="menu.departments" onclick="APP.switchView('departments')">
+          <span class="nav-icon">🏢</span> Cơ cấu Phòng ban
+        </a>
+        <a class="nav-item" data-view="document_types" data-menu-perm="menu.document_types" onclick="APP.switchView('document_types')">
+          <span class="nav-icon">📚</span> Danh mục Loại sổ (VB)
+        </a>
+
+        <div class="nav-group-title">QUẢN TRỊ HỆ THỐNG</div>
+        <a class="nav-item" data-view="users" data-menu-perm="menu.users" onclick="APP.switchView('users')">
+          <span class="nav-icon">👥</span> Người dùng & Quyền
+        </a>
+        <a class="nav-item" data-view="settings" data-menu-perm="menu.settings" onclick="APP.switchView('settings')">
+          <span class="nav-icon">⚙️</span> Cấu hình & Số nhảy
+        </a>
+        <a class="nav-item" data-view="audit" data-menu-perm="menu.audit" onclick="APP.switchView('audit')">
+          <span class="nav-icon">🛡️</span> Nhật ký Kiểm toán
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-badge">
+          <div class="user-avatar" id="current-user-avatar">A</div>
+          <div class="user-meta">
+            <div class="user-meta-name" id="current-user-name">Đang tải...</div>
+            <div class="user-meta-role" id="current-user-role">Quản trị viên</div>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="DMS.handleLogout()" title="Đăng xuất">🚪</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Backdrop đóng Sidebar trên Mobile -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="APP.closeSidebar()"></div>
+
+    <!-- Khung Nội dung Chính -->
+    <main class="main-wrapper">
+      <header class="top-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <button class="btn-mobile-menu" id="btn-mobile-menu" onclick="APP.toggleSidebar()" title="Mở danh mục">☰</button>
+          <div class="header-title" id="page-header-title">
+            <span>📊</span> Bảng Điều Khiển & Hàng Đợi Công Việc
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-secondary btn-sm" id="btn-trigger-scan" onclick="DMS.triggerScanDeadlines()" title="Quét thời hạn và cảnh báo">
+            🔔 Quét Deadline
+          </button>
+        </div>
+      </header>
+
+      <div class="content-area">
+        <?!= include('views/dashboard'); ?>
+        <?!= include('views/my-tasks'); ?>
+        <?!= include('views/incoming-docs'); ?>
+        <?!= include('views/outgoing-docs'); ?>
+        <?!= include('views/document-detail'); ?>
+        <?!= include('views/departments'); ?>
+        <?!= include('views/document-types'); ?>
+        <?!= include('views/users'); ?>
+        <?!= include('views/settings'); ?>
+        <?!= include('views/audit'); ?>
+      </div>
+    </main>
+  </div>
+
+  <!-- Hộp thoại Modal -->
+  <?!= include('views/modals'); ?>
+
+  <!-- Toast Thông báo -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- JavaScript Client Logic -->
+  <?!= include('views/js'); ?>
+</body>
+</html>

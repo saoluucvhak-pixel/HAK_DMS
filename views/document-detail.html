@@ -1,0 +1,107 @@
+<!-- View: Document Detail (Chi tiết hồ sơ văn bản & Xem trước tệp tin Drive) -->
+<div id="view-document-detail" class="view-section">
+  <!-- Thanh điều hướng quay lại & Thao tác quy trình -->
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+    <button class="btn btn-secondary" onclick="DMS.backToList()">
+      ⬅️ Quay lại danh sách
+    </button>
+    <div id="detail-workflow-actions" style="display: flex; gap: 10px;">
+      <!-- Các nút hành động quy trình FSM sinh động theo quyền của người dùng -->
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 400px; gap: 24px;">
+    <!-- Cột Trái: Thông tin Metadata & Xem trước PDF Drive -->
+    <div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span id="detail-badge-type" class="badge badge-primary">VB ĐẾN</span>
+            <span id="detail-doc-id" style="margin-left: 8px; font-weight: 700;">DOC-2026-000000</span>
+          </div>
+          <span id="detail-badge-status" class="badge badge-warning">ĐANG XỬ LÝ</span>
+        </div>
+        <div class="card-body">
+          <h2 id="detail-title" style="font-size: 18px; font-weight: 700; margin-bottom: 16px; line-height: 1.4;">
+            Trích yếu văn bản đang tải...
+          </h2>
+
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px; font-size: 13px;">
+            <div><strong>Số hiệu:</strong> <span id="detail-doc-no">-</span></div>
+            <div><strong>Ký hiệu:</strong> <span id="detail-symbol">-</span></div>
+            <div><strong>Cơ quan ban hành:</strong> <span id="detail-issuer">-</span></div>
+            <div><strong>Loại văn bản:</strong> <span id="detail-category">-</span></div>
+            <div><strong>Ngày ban hành:</strong> <span id="detail-issue-date">-</span></div>
+            <div><strong>Ngày nhận vào sổ:</strong> <span id="detail-received-date">-</span></div>
+            <div><strong>Độ khẩn:</strong> <span id="detail-priority">-</span></div>
+            <div><strong>Độ mật:</strong> <span id="detail-confidentiality">-</span></div>
+            <div style="grid-column: span 2;"><strong>Đơn vị chủ trì / Soạn thảo:</strong> <span id="detail-department" class="badge badge-info" style="font-size: 12px; margin-left: 6px;">-</span></div>
+          </div>
+
+          <!-- Khung Preview Tệp tin PDF Google Drive -->
+          <div style="border-top: 1px solid var(--border); padding-top: 16px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+              <div style="font-weight: 600; font-size: 14px;">📎 Tệp tin đính kèm:</div>
+              <a id="detail-file-download-link" href="#" target="_blank" class="btn btn-secondary btn-sm" style="display:none;">
+                Mở trong Google Drive ↗
+              </a>
+            </div>
+            
+            <div id="detail-pdf-viewer-container" style="background: #f1f5f9; border-radius: var(--radius-sm); height: 500px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid var(--border);">
+              <iframe id="detail-pdf-iframe" src="" style="width: 100%; height: 100%; border: none; display: none;"></iframe>
+              <div id="detail-pdf-empty" style="color: var(--text-muted);">Không có tệp tin đính kèm hoặc chưa tải file.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cột Phải: Phân công nhiệm vụ, Lịch sử luân chuyển, Ý kiến -->
+    <div>
+      <!-- Khối: Phân công xử lý -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">👥 CÁN BỘ XỬ LÝ</div>
+          <button class="btn btn-primary btn-sm" id="btn-open-assign-modal" style="display: none;" onclick="DMS.openAssignModal()">
+            ➕ Giao việc
+          </button>
+        </div>
+        <div class="card-body" style="padding: 12px;">
+          <div id="detail-assignments-list">
+            <div style="color: var(--text-muted); font-size: 12px; text-align: center; padding: 12px;">
+              Chưa có phân công xử lý cho văn bản này.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Khối: Lịch sử luân chuyển quy trình -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📜 LỊCH SỬ LUÂN CHUYỂN</div>
+        </div>
+        <div class="card-body" style="padding: 16px; max-height: 250px; overflow-y: auto;">
+          <div id="detail-history-timeline" style="font-size: 12px;">
+            <!-- Timeline items -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Khối: Ý kiến chỉ đạo & Thảo luận -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">💬 Ý KIẾN CHỈ ĐẠO</div>
+        </div>
+        <div class="card-body" style="padding: 16px;">
+          <div id="detail-comments-list" style="max-height: 200px; overflow-y: auto; margin-bottom: 12px;">
+            <div style="color: var(--text-muted); font-size: 12px; text-align: center; padding: 10px;">Chưa có ý kiến nào.</div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="input-new-comment" class="form-control" placeholder="Nhập ý kiến chỉ đạo / nhận xét...">
+            <button class="btn btn-primary btn-sm" id="btn-submit-comment" onclick="DMS.submitComment()">Gửi</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,28 @@
+<!-- View: Departments (Quản lý Phòng ban) -->
+<div id="view-departments" class="view-section">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">🏢 CƠ CẤU PHÒNG BAN / ĐƠN VỊ TRỰC THUỘC</div>
+      <button class="btn btn-primary btn-sm" onclick="DMS.openDepartmentModal()">➕ Thêm phòng ban mới</button>
+    </div>
+    <div class="table-responsive">
+      <table class="table-custom">
+        <thead>
+          <tr>
+            <th>Mã định danh</th>
+            <th>Mã code</th>
+            <th>Tên phòng ban / Đơn vị</th>
+            <th>Trưởng phòng / Phụ trách</th>
+            <th style="text-align: center;">Số nhân sự</th>
+            <th style="text-align: center;">Văn bản xử lý</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="departments-tbody">
+          <tr><td colspan="8" style="text-align: center; padding: 24px;">Đang tải danh sách phòng ban...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

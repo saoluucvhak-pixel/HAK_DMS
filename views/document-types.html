@@ -1,0 +1,33 @@
+<!-- View: Document Types (Quản lý Danh mục Loại sổ & Loại văn bản) -->
+<div id="view-document-types" class="view-section">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">📚 DANH MỤC LOẠI SỔ & LOẠI VĂN BẢN</div>
+      <button class="btn btn-primary btn-sm" onclick="DMS.openDocumentTypeModal()">➕ Thêm loại sổ mới</button>
+    </div>
+    <div class="card-body" style="padding-bottom: 0;">
+      <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px; background: #f8fafc; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+        ℹ️ Danh mục định danh các loại sổ văn bản và tài liệu trong cơ quan (Công văn, Quyết định, Tờ trình, Thông báo, Kế hoạch, Báo cáo, Hợp đồng...). Các loại sổ đang <strong>Hoạt động</strong> sẽ tự động hiển thị trong biểu mẫu tiếp nhận văn bản đến, soạn thảo văn bản đi và các bộ lọc tìm kiếm toàn hệ thống.
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table-custom">
+        <thead>
+          <tr>
+            <th>Mã loại (ID)</th>
+            <th>Mã định danh (Code)</th>
+            <th>Tên loại sổ / Văn bản</th>
+            <th>Tiền tố số (Prefix)</th>
+            <th>Mô tả phạm vi</th>
+            <th>Số lượng VB</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="document-types-tbody">
+          <tr><td colspan="8" style="text-align: center; padding: 28px;"><div class="spinner-inline" style="margin: 0 auto 8px auto;"></div>Đang tải danh mục loại sổ...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

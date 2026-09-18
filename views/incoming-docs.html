@@ -1,0 +1,73 @@
+<!-- View: Incoming Docs (Văn bản Đến) -->
+<div id="view-incoming-docs" class="view-section">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">📥 SỔ VĂN BẢN ĐẾN</div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-primary btn-sm" id="btn-open-receive-modal" onclick="DMS.openReceiveModal()">
+          ➕ Tiếp nhận văn bản mới
+        </button>
+      </div>
+    </div>
+    <div class="card-body" style="padding-bottom: 0;">
+      <!-- Bộ lọc -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) 100px; gap: 12px; margin-bottom: 16px;">
+        <input type="text" id="incoming-filter-search" class="form-control" placeholder="Tìm số hiệu, trích yếu, cơ quan..." oninput="DMS.debounceLoadIncoming()">
+        
+        <select id="incoming-filter-category" class="form-control" onchange="DMS.loadIncomingDocs(1)">
+          <option value="ALL">Tất cả loại văn bản</option>
+        </select>
+
+        <select id="incoming-filter-status" class="form-control" onchange="DMS.loadIncomingDocs(1)">
+          <option value="ALL">Tất cả trạng thái</option>
+          <option value="RECEIVED">Mới tiếp nhận</option>
+          <option value="REGISTERED">Đã vào sổ</option>
+          <option value="SUBMITTED">Chờ lãnh đạo chỉ đạo</option>
+          <option value="PROCESSING">Đang xử lý</option>
+          <option value="COMPLETED">Đã hoàn thành</option>
+          <option value="ARCHIVED">Đã lưu trữ</option>
+        </select>
+
+        <select id="incoming-filter-priority" class="form-control" onchange="DMS.loadIncomingDocs(1)">
+          <option value="ALL">Tất cả độ khẩn</option>
+          <option value="NORMAL">Bình thường</option>
+          <option value="URGENT">Khẩn</option>
+          <option value="VERY_URGENT">Thượng khẩn</option>
+          <option value="FLASH">Hỏa tốc</option>
+        </select>
+
+        <select id="incoming-filter-dept" class="form-control" onchange="DMS.loadIncomingDocs(1)">
+          <option value="ALL">Tất cả phòng ban</option>
+        </select>
+
+        <button class="btn btn-secondary" onclick="DMS.resetIncomingFilters()">Đặt lại</button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table-custom">
+        <thead>
+          <tr>
+            <th>Mã hệ thống</th>
+            <th>Số hiệu gốc</th>
+            <th>Ngày nhận</th>
+            <th>Cơ quan ban hành</th>
+            <th>Đơn vị chủ trì</th>
+            <th>Trích yếu nội dung</th>
+            <th>Độ khẩn</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="incoming-docs-tbody">
+          <tr>
+            <td colspan="9" style="text-align:center; padding: 24px;">Đang tải danh sách văn bản đến...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Phân trang chuẩn -->
+    <div class="pagination-wrapper" id="incoming-pagination"></div>
+  </div>
+</div>

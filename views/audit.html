@@ -1,0 +1,48 @@
+<!-- View: Audit Log (Nhật ký Kiểm toán Toàn diện) -->
+<div id="view-audit" class="view-section">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">🛡️ NHẬT KÝ KIỂM TOÁN HỆ THỐNG (AUDIT LOG)</div>
+      <button class="btn btn-secondary btn-sm" onclick="DMS.loadAuditLogs(1)">🔄 Làm mới</button>
+    </div>
+    <div class="card-body" style="padding-bottom: 0;">
+      <div style="display: grid; grid-template-columns: 1fr 180px 180px; gap: 12px; margin-bottom: 16px;">
+        <input type="text" id="audit-filter-search" class="form-control" placeholder="Tìm theo nội dung, người thao tác, mã số..." oninput="DMS.debounceLoadAudit()">
+        <select id="audit-filter-entity" class="form-control" onchange="DMS.loadAuditLogs(1)">
+          <option value="ALL">Tất cả phân hệ</option>
+          <option value="DOCUMENT">Văn bản</option>
+          <option value="ASSIGNMENT">Phân công</option>
+          <option value="USER">Người dùng</option>
+          <option value="ROLE">Vai trò & Quyền</option>
+          <option value="CONFIG">Cấu hình</option>
+        </select>
+        <select id="audit-filter-action" class="form-control" onchange="DMS.loadAuditLogs(1)">
+          <option value="ALL">Tất cả hành động</option>
+          <option value="WORKFLOW_TRANSITION">Chuyển trạng thái</option>
+          <option value="RECEIVE_INCOMING_DOC">Tiếp nhận VB</option>
+          <option value="CREATE_OUTGOING_DRAFT">Tạo dự thảo</option>
+          <option value="ISSUE_NUMBER">Cấp số</option>
+          <option value="LOGIN">Đăng nhập</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table-custom">
+        <thead>
+          <tr>
+            <th>Thời gian</th>
+            <th>Người thực hiện</th>
+            <th>Hành vi</th>
+            <th>Phân hệ</th>
+            <th>Mã đối tượng</th>
+            <th>Nội dung chi tiết</th>
+          </tr>
+        </thead>
+        <tbody id="audit-tbody">
+          <tr><td colspan="6" style="text-align: center; padding: 20px;">Đang tải nhật ký kiểm toán...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination-wrapper" id="audit-pagination"></div>
+  </div>
+</div>
