@@ -2877,13 +2877,19 @@ var DMS = {
   },
 
   openLegalRecordModal: function(recordId) {
+    var idInput = document.getElementById("legal-form-id");
+    if (!idInput || !document.getElementById("modal-legal-record-form")) {
+      APP.toast("Không tìm thấy giao diện Hồ sơ Pháp lý (modal-legal-record-form). Có thể file views/modals.html chưa được cập nhật/deploy đầy đủ. Vui lòng kiểm tra lại bản deploy.", "error");
+      return;
+    }
+
     var form = document.getElementById("form-legal-record-edit");
     if (form) form.reset();
 
     DMS.populateLegalRecordTypeSelects();
 
     var titleEl = document.getElementById("legal-record-modal-title");
-    document.getElementById("legal-form-id").value = recordId || "";
+    idInput.value = recordId || "";
     document.getElementById("legal-form-file-id").value = "";
     document.getElementById("legal-form-file-name").value = "";
     var fileInfo = document.getElementById("legal-form-file-info");
